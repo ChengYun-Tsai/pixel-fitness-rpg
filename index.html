@@ -1,0 +1,3073 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pixel Fitness">
+<meta name="theme-color" content="#1a1c2c">
+<title>Pixel Fitness RPG｜像素健身冒險</title>
+<!-- 像素英文字體（只用於數字與英文標題；沒有網路時會自動改用系統字體，不影響功能） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   Pixel Fitness RPG — 樣式
+   色票：Sweetie-16（復古 16-bit 風格）
+   ========================================================= */
+:root{
+  --bg:#1a1c2c; --bg2:#232741; --panel:#333c57; --ink:#f4f4f4; --muted:#94b0c2; --dim:#566c86;
+  --red:#b13e53; --orange:#ef7d57; --yellow:#ffcd75; --lime:#a7f070; --green:#38b764; --teal:#257179;
+  --navy:#29366f; --blue:#3b5dc9; --sky:#41a6f6; --cyan:#73eff7; --purple:#5d275d; --black:#0d0e17;
+  --pixel:"Press Start 2P", ui-monospace, monospace;
+  --tab-h:66px; --timer-h:0px;
+  --safe-b:env(safe-area-inset-bottom, 0px); --safe-t:env(safe-area-inset-top, 0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size:16px 16px;
+  color:var(--ink);
+  font-family:-apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  font-size:16px; line-height:1.55; -webkit-text-size-adjust:100%;
+  min-height:100dvh;
+}
+body.timer-on{--timer-h:118px}
+a{color:var(--cyan)}
+h1,h2,h3{margin:0 0 6px;line-height:1.3}
+h2{font-size:19px} h3{font-size:16px}
+p{margin:6px 0}
+.px{font-family:var(--pixel);letter-spacing:.5px}
+.muted{color:var(--muted)} .dim{color:var(--dim)} .small{font-size:13px} .tiny{font-size:11px}
+.yellow{color:var(--yellow)} .lime{color:var(--lime)} .red{color:#ff7a8f} .cyan{color:var(--cyan)}
+.row{display:flex;align-items:center;gap:8px}
+.row.wrap{flex-wrap:wrap} .between{justify-content:space-between} .grow{flex:1;min-width:0}
+.center{text-align:center}
+.hidden{display:none!important}
+.mt{margin-top:10px} .mb{margin-bottom:10px}
+
+/* ---------- 頂部列 ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;
+  padding:calc(8px + var(--safe-t)) 12px 8px;
+  background:var(--black);border-bottom:3px solid var(--panel);
+  display:flex;align-items:center;gap:10px;
+}
+.topbar .logo{font-family:var(--pixel);font-size:10px;color:var(--yellow);line-height:1.5;flex:1}
+.topbar .logo span{color:var(--cyan)}
+.chip-px{font-family:var(--pixel);font-size:10px;padding:6px 8px;background:var(--bg2);border:2px solid var(--panel);white-space:nowrap}
+.icon-btn{background:var(--bg2);border:2px solid var(--panel);color:var(--ink);font-size:18px;width:40px;height:36px;border-radius:0;cursor:pointer}
+
+/* ---------- 主內容 ---------- */
+main{max-width:600px;margin:0 auto;padding:12px 12px calc(var(--tab-h) + var(--timer-h) + var(--safe-b) + 24px)}
+
+/* ---------- 像素框 ---------- */
+.box{
+  background:var(--bg2);border:3px solid var(--ink);
+  box-shadow:0 0 0 3px var(--black), 5px 5px 0 3px var(--black);
+  padding:14px;margin:14px 3px 18px;position:relative;
+}
+.box.alt{border-color:var(--sky)} .box.warn{border-color:var(--orange)} .box.good{border-color:var(--lime)}
+.box.gold{border-color:var(--yellow)} .box.danger{border-color:var(--red)}
+.box-title{
+  position:absolute;top:-14px;left:10px;background:var(--black);padding:3px 8px;
+  font-family:var(--pixel);font-size:9px;color:var(--yellow);border:2px solid currentColor;
+}
+.box-title + *{margin-top:4px}
+
+/* ---------- 按鈕 ---------- */
+button{font:inherit;color:inherit}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:46px;padding:10px 14px;cursor:pointer;
+  background:var(--blue);color:#fff;font-weight:700;font-size:15px;
+  border:3px solid var(--black);border-radius:0;
+  box-shadow:inset -3px -3px 0 rgba(0,0,0,.35), inset 3px 3px 0 rgba(255,255,255,.22);
+  user-select:none;-webkit-user-select:none;
+}
+.btn:active{transform:translate(2px,2px);box-shadow:inset 3px 3px 0 rgba(0,0,0,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.block{display:flex;width:100%}
+.btn.green{background:var(--green)} .btn.red{background:var(--red)} .btn.orange{background:var(--orange);color:var(--black)}
+.btn.yellow{background:var(--yellow);color:var(--black)} .btn.ghost{background:var(--panel)} .btn.dark{background:var(--black)}
+.btn.sm{min-height:38px;padding:6px 10px;font-size:14px}
+.btn.big{min-height:58px;font-size:18px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-row > .btn{flex:1 1 auto}
+
+/* ---------- 底部導覽 ---------- */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:var(--black);border-top:3px solid var(--panel);
+  display:flex;padding:4px 4px calc(4px + var(--safe-b));
+}
+.tabbar button{
+  flex:1;background:none;border:0;cursor:pointer;padding:6px 0 4px;min-height:56px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--dim);
+}
+.tabbar button .lbl{font-size:12px;font-weight:700}
+.tabbar button.on{color:var(--yellow)}
+.tabbar button.on .sprite{filter:drop-shadow(0 0 0 var(--yellow))}
+
+/* ---------- 進度條 ---------- */
+.bar{height:16px;background:var(--black);border:2px solid var(--ink);position:relative;overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--lime);
+  background-image:repeating-linear-gradient(90deg, transparent 0 6px, rgba(0,0,0,.18) 6px 8px)}
+.bar.exp > i{background-color:var(--sky)} .bar.gold > i{background-color:var(--yellow)} .bar.hp > i{background-color:var(--red)}
+.bar.thin{height:10px}
+
+/* ---------- 標籤 ---------- */
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 7px;background:var(--panel);border:2px solid var(--black);margin:2px 4px 2px 0}
+.tag.warn{background:var(--orange);color:var(--black)} .tag.ok{background:var(--green)} .tag.skip{background:var(--dim)}
+.tag.info{background:var(--navy)} .tag.pending{background:var(--purple);color:var(--yellow)}
+
+/* ---------- 首頁 ---------- */
+.hero-card{display:flex;gap:14px;align-items:center}
+.hero-stage{background:linear-gradient(#29366f 0 60%, #257179 60% 100%);border:3px solid var(--black);padding:8px;display:flex;align-items:flex-end;justify-content:center;min-width:104px;min-height:112px}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.week-cell{background:var(--black);border:2px solid var(--panel);padding:6px 2px;text-align:center;font-size:12px;min-height:66px}
+.week-cell .wd{font-weight:700;color:var(--muted)}
+.week-cell .pl{font-size:11px;margin-top:2px}
+.week-cell.today{border-color:var(--yellow)}
+.week-cell.done{background:#1d3b2c;border-color:var(--green)}
+.week-cell.part{background:#3d3420;border-color:var(--yellow)}
+.week-cell .ck{font-family:var(--pixel);font-size:10px;color:var(--lime);margin-top:3px}
+.stat-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tile{background:var(--black);border:2px solid var(--panel);padding:8px}
+.tile .v{font-family:var(--pixel);font-size:14px;color:var(--yellow);margin-top:4px}
+.tile .k{font-size:12px;color:var(--muted)}
+
+/* ---------- 分段切換 ---------- */
+.seg{display:flex;gap:0;border:3px solid var(--black);margin:4px 3px 8px;overflow-x:auto}
+.seg button{flex:1;min-height:44px;background:var(--panel);border:0;border-right:2px solid var(--black);cursor:pointer;font-weight:700;font-size:14px;padding:6px 8px;white-space:nowrap}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--yellow);color:var(--black)}
+
+/* ---------- 課表與動作卡 ---------- */
+.ex-card{background:var(--bg2);border:3px solid var(--muted);box-shadow:0 0 0 3px var(--black),4px 4px 0 3px var(--black);margin:14px 3px 18px;padding:12px}
+.ex-card.current{border-color:var(--yellow)}
+.ex-card.done{border-color:var(--green)}
+.ex-card.skipped{border-color:var(--dim);opacity:.85}
+.ex-card.swapped{border-color:var(--cyan)}
+.ex-card.flagged{border-color:var(--red)}
+.variant-pick{background:var(--black);border:2px solid var(--cyan);padding:8px;margin:10px 0 4px;display:flex;flex-direction:column;gap:6px}
+.variant-pick .lbl{font-size:12px;font-weight:800;color:var(--muted)}
+.vbtn{min-height:44px;text-align:left;padding:8px 10px;background:var(--panel);border:2px solid var(--black);color:var(--ink);font-weight:700;font-size:14px;cursor:pointer}
+.vbtn.on{background:var(--cyan);color:var(--black)}
+.ex-head{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.ex-num{font-family:var(--pixel);font-size:11px;background:var(--black);color:var(--yellow);padding:6px;min-width:34px;text-align:center}
+.ex-name{font-weight:800;font-size:17px;line-height:1.35}
+.ex-meta{display:flex;flex-wrap:wrap;gap:2px;margin-top:4px}
+.presc{font-weight:800;color:var(--yellow);font-size:15px;margin-top:6px}
+.info{background:var(--black);border-left:4px solid var(--sky);padding:10px;margin-top:10px;font-size:14.5px}
+.info.alt{border-left-color:var(--cyan)} .info.warn{border-left-color:var(--orange)} .info.pend{border-left-color:var(--purple)}
+.info .lbl{font-weight:800;color:var(--muted);font-size:12px;display:block;margin-bottom:2px}
+.toggle-link{background:none;border:0;color:var(--cyan);font-weight:700;padding:8px 0;cursor:pointer;font-size:14px}
+.last-rec{background:#1c2236;border:2px dashed var(--dim);padding:8px;margin-top:10px;font-size:14px}
+.last-rec b{color:var(--cyan)}
+.hint-up{background:#22381f;border:2px solid var(--green);padding:8px;margin-top:8px;font-size:13.5px}
+
+/* 每組輸入 */
+.set-row{display:flex;align-items:center;gap:8px;padding:8px;margin-top:6px;background:var(--black);border:2px solid var(--panel);cursor:pointer}
+.set-row.done{border-color:var(--green)}
+.set-row .sl{font-weight:800;min-width:56px}
+.set-row .sv{flex:1;font-size:14px;color:var(--muted)}
+.set-row.done .sv{color:var(--ink)}
+.set-edit{background:var(--black);border:3px solid var(--yellow);padding:10px;margin-top:8px}
+.set-edit .sl{font-weight:800;color:var(--yellow);margin-bottom:6px;display:flex;justify-content:space-between}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fgrid .full{grid-column:1 / -1}
+label.f{display:flex;flex-direction:column;font-size:12px;color:var(--muted);font-weight:700;gap:3px}
+input,select,textarea{
+  font:inherit;font-size:16px;color:var(--ink);background:#10121d;border:2px solid var(--dim);
+  padding:10px;border-radius:0;width:100%;min-height:46px;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--yellow)}
+input[type=range]{padding:0;min-height:36px;accent-color:var(--yellow)}
+input[type=checkbox]{width:24px;height:24px;min-height:0;accent-color:var(--lime)}
+input.big-num{font-size:24px;font-weight:800;text-align:center;font-family:var(--pixel);font-size:18px}
+
+.card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.card-actions .btn{flex:1 1 30%}
+
+/* 身體狀況 */
+.pain-scale{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.pain-val{font-family:var(--pixel);font-size:22px;text-align:center;margin:4px 0}
+.alert{padding:10px;border:3px solid var(--black);margin-top:8px;font-weight:700;font-size:14.5px}
+.alert.ok{background:#1d3b2c;border-color:var(--green)}
+.alert.mid{background:#3d3420;border-color:var(--yellow)}
+.alert.stop{background:#4a1d27;border-color:var(--red)}
+
+/* ---------- 計時器 ---------- */
+.timer{
+  position:fixed;left:0;right:0;z-index:35;
+  bottom:calc(var(--tab-h) + var(--safe-b));
+  background:var(--black);border-top:3px solid var(--yellow);
+  padding:8px 12px;
+}
+.timer .inner{max-width:600px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.timer .t-num{font-family:var(--pixel);font-size:30px;color:var(--yellow);min-width:132px;text-align:center}
+.timer.work .t-num{color:var(--lime)} .timer.work{border-top-color:var(--lime)}
+.timer .t-lbl{font-size:13px;font-weight:700;color:var(--muted);line-height:1.3}
+.timer .t-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
+.timer .t-btns .btn{min-height:40px;padding:4px;font-size:13px}
+.timer .bar{margin-top:4px}
+
+/* ---------- 訓練中頂部 ---------- */
+.sess-head{position:relative}
+.elapsed{font-family:var(--pixel);font-size:16px;color:var(--lime)}
+.paused-veil{position:fixed;inset:0;background:rgba(13,14,23,.92);z-index:60;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:20px;text-align:center}
+.paused-veil .px{font-size:22px;color:var(--yellow)}
+
+/* ---------- Modal ---------- */
+.modal-back{position:fixed;inset:0;background:rgba(13,14,23,.8);z-index:80;display:flex;align-items:flex-end;justify-content:center}
+.modal{
+  background:var(--bg2);border:3px solid var(--ink);box-shadow:0 0 0 3px var(--black);
+  width:100%;max-width:600px;max-height:90dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px 16px calc(16px + var(--safe-b));
+}
+@media (min-width:640px){ .modal-back{align-items:center} .modal{max-height:86vh} }
+.modal-title{font-family:var(--pixel);font-size:12px;color:var(--yellow);margin-bottom:12px;line-height:1.6}
+.modal .close-x{float:right;background:var(--panel);border:2px solid var(--black);width:40px;height:40px;font-size:18px;cursor:pointer}
+
+/* ---------- Toast ---------- */
+#toastRoot{position:fixed;left:0;right:0;top:calc(64px + var(--safe-t));z-index:100;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.toast{background:var(--black);border:3px solid var(--yellow);padding:10px 14px;font-weight:700;max-width:92%;font-size:14.5px;animation:pop .2s steps(3)}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ---------- 角色 ---------- */
+.char-top{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.stat-line{display:grid;grid-template-columns:52px 1fr 54px;gap:8px;align-items:center;margin:8px 0}
+.stat-line .k{font-family:var(--pixel);font-size:11px}
+.stat-line .v{font-family:var(--pixel);font-size:11px;text-align:right;color:var(--yellow)}
+.slot-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.slot{background:var(--black);border:2px solid var(--panel);padding:8px;cursor:pointer;display:flex;gap:8px;align-items:center;min-height:64px;text-align:left}
+.slot .sn{font-size:11px;color:var(--muted);font-weight:700}
+.slot .in{font-weight:800;font-size:14px}
+.item-list{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;gap:10px;align-items:center;background:var(--black);border:2px solid var(--panel);padding:10px}
+.item.eq{border-color:var(--yellow)}
+.item.locked{opacity:.6}
+.swatch{width:28px;height:28px;border:3px solid var(--black);box-shadow:0 0 0 2px var(--ink);flex:none}
+
+/* ---------- 地圖 ---------- */
+.world svg{width:100%;height:auto;display:block;border:3px solid var(--black)}
+.region{border-color:var(--muted)}
+.region.locked{opacity:.7;filter:grayscale(.7)}
+.stage-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.stage{flex:1 1 30%;background:var(--black);border:2px solid var(--panel);padding:6px;text-align:center;font-size:12px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.stage.clear{border-color:var(--green)}
+.stage.boss{border-color:var(--red);flex-basis:100%;flex-direction:row;gap:10px;justify-content:flex-start;text-align:left;min-height:0}
+.stage.boss.clear{border-color:var(--yellow)}
+.silh{filter:brightness(0) opacity(.55)}
+.dex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dex-cell{background:var(--black);border:2px solid var(--panel);padding:6px;text-align:center;font-size:12px;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.battle{background:linear-gradient(#29366f 0 55%, #333c57 55%);border:3px solid var(--black);padding:14px;display:flex;justify-content:space-between;align-items:flex-end;min-height:150px}
+.shake{animation:shake .35s steps(4)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hop{animation:hop .35s steps(3)}
+@keyframes hop{50%{transform:translate(14px,-8px)}}
+
+/* ---------- 成就 ---------- */
+.ach{display:flex;gap:10px;align-items:center;background:var(--black);border:2px solid var(--panel);padding:10px;margin-bottom:8px}
+.ach.on{border-color:var(--yellow)}
+.ach .ic{font-size:26px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border:2px solid var(--panel);flex:none}
+.ach:not(.on) .ic{filter:grayscale(1) opacity(.5)}
+
+/* ---------- 統計 / 歷史 ---------- */
+.chart{width:100%;height:auto;display:block;background:var(--black);border:2px solid var(--panel)}
+.hist-item{background:var(--black);border:2px solid var(--panel);padding:10px;margin-bottom:8px;cursor:pointer}
+.hist-item:active{border-color:var(--yellow)}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th,table.t td{border:1px solid var(--panel);padding:6px;text-align:left;vertical-align:top}
+table.t th{background:var(--black);color:var(--muted);font-size:12px}
+.scroll-x{overflow-x:auto}
+ul.rules{margin:4px 0;padding-left:20px} ul.rules li{margin:4px 0}
+details summary{cursor:pointer;font-weight:800;padding:6px 0;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▶ ";color:var(--yellow);font-size:12px}
+details[open] summary::before{content:"▼ "}
+.levelup{font-family:var(--pixel);color:var(--yellow);font-size:16px;text-align:center;padding:10px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{color:var(--orange)}}
+.sprite{image-rendering:pixelated;display:block}
+</style>
+</head>
+<body>
+<noscript><p style="padding:20px">這個遊戲需要開啟 JavaScript 才能使用。</p></noscript>
+
+<header class="topbar">
+  <div class="logo">PIXEL <span>FITNESS</span> RPG</div>
+  <div class="chip-px" id="tbLevel">LV 1</div>
+  <div class="chip-px yellow" id="tbGold">G 0</div>
+  <button class="icon-btn" data-act="openSettings" aria-label="設定與備份">⚙</button>
+</header>
+
+<main id="view"></main>
+
+<div class="timer hidden" id="timerBar"></div>
+
+<nav class="tabbar" id="tabbar">
+  <button data-act="tab" data-tab="home"><span data-icon="home"></span><span class="lbl">首頁</span></button>
+  <button data-act="tab" data-tab="workout"><span data-icon="sword"></span><span class="lbl">訓練</span></button>
+  <button data-act="tab" data-tab="character"><span data-icon="hero"></span><span class="lbl">角色</span></button>
+  <button data-act="tab" data-tab="map"><span data-icon="map"></span><span class="lbl">地圖</span></button>
+  <button data-act="tab" data-tab="achievements"><span data-icon="trophy"></span><span class="lbl">成就</span></button>
+</nav>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<input type="file" id="importFile" accept="application/json,.json" class="hidden">
+
+<script>
+'use strict';
+/* =====================================================================
+   Pixel Fitness RPG
+   ---------------------------------------------------------------------
+   程式結構：
+   1. 課表資料（唯一正式訓練資料來源：新版《居家健身課表.txt》）
+   2. 遊戲內容（裝備、地圖、怪物、成就）
+   3. 資料保存（LocalStorage；訓練紀錄 / 遊戲進度 / 設定 分開保存）
+   4. 工具函式
+   5. 訓練資料查詢與統計
+   6. 獎勵系統（EXP、金幣、等級、成就）
+   7. 像素圖形
+   8. 計時器
+   9. 畫面（首頁、訓練、角色、地圖、成就、彈窗）
+   10. 操作事件
+   ===================================================================== */
+
+/* =====================================================================
+   1. 課表資料
+   - 文字內容逐字取自原始課表，不增刪動作、組數、次數、休息時間。
+   - prescription：原始課表的組數次數寫法（畫面上原樣顯示）。
+   - sets / repMin / repMax / duration / restSeconds：給程式用的數字，由 prescription 轉換。
+   - category：只用在「統計圖表的肌群分類」，不影響訓練內容。
+   - pending：原始課表不明確、需要確認的地方（保留原文，不猜測）。
+   ===================================================================== */
+const PLAN_META = {
+  title: '居家健身課表',
+  schedule: '每週 4 練：週一 上肢 A、週二 下肢 A、週四 上肢 B、週六 下肢 B（沒練到就隔天補）',
+  split: '上下肢輪流，每個大肌群一週練 2 次 · 增肌減脂',
+  equipment: '環狀阻力帶（最輕）、單槓、椅子、桌腳、水瓶',
+  flow: '每次約 60 分鐘：動態熱身 → 肌力訓練 → 居家 HIIT → 收操 5 分鐘'
+};
+
+const SAFETY_RULES = [
+  '疼痛分數 0–10：3 分以下可以繼續；4 分以上、或手麻變明顯就停下，改做替代動作或跳過。',
+  '隔天檢查：24 小時內肩膀、下背回到原本狀態就 OK；變更糟代表量太多，下次少一組。',
+  '腕隧道：手腕保持直的，握帶子輕輕握就好，伏地挺身握拳，單槓懸吊別撐太久。',
+  '標 ⚠ 的動作請先給復健師看過。'
+];
+
+const PROGRESSION_RULES = [
+  '某個動作「每一組」都做到範圍上限，下次就加難度：放慢下放（3 秒）、多一組、換更強的阻力帶，或換更難的變化式。',
+  '引體向上路線：肩胛引體 → 粗帶輔助 3–6 下 → 細帶輔助 → 每次最後試 1 下不用輔助的。',
+  '建議再買一條中等磅數（約 30–60 磅）的阻力帶：輔助引體、划船、下拉、深蹲用粗的；側平舉、面拉、手臂動作用細的。'
+];
+
+const NUTRITION_NOTES = [
+  '訓練日蛋白質目標 125 g。',
+  '早上練：9:30 的早餐就是練後餐，吃到 25–40 g 蛋白質和一份澱粉。',
+  '下午練：14:00 的午餐當練前餐，18:30 的晚餐就是練後餐。',
+  '休息日可以快走 30–40 分鐘，或每天走到 8000 步以上。'
+];
+
+/* 熱身：兩支影片挑一支跟著做（只需要「已完成」勾選） */
+const WARMUP_UPPER = {
+  title: '上肢動態熱身（約 5–8 分鐘）',
+  text: '兩支影片挑一支跟著做，時間夠就兩支都做。',
+  videos: [
+    { label: '兩招動態暖身：前側鏈伸展、蟲爬（林勁瑋 × Barry 教練・7 分鐘）', url: 'https://www.youtube.com/watch?v=ji1ZmQ67a1k' },
+    { label: '訓練前的動態暖身｜上肢篇（女力健身 Nuli・5 分鐘）', url: 'https://www.youtube.com/watch?v=X6OXfo-KG5A' }
+  ],
+  warning: '蟲爬要用手撐地，手腕不舒服就握拳撐，或先跳過；肩膀的動作只做不痛的範圍。'
+};
+const WARMUP_LOWER = {
+  title: '下肢動態熱身（約 5–8 分鐘）',
+  text: '兩支影片挑一支跟著做，時間夠就兩支都做。',
+  videos: [
+    { label: '下肢兩招動態暖身（林勁瑋 × Barry 教練・8 分鐘）', url: 'https://www.youtube.com/watch?v=A9rnEIKlcdg' },
+    { label: '訓練前的動態暖身｜下肢篇（女力健身 Nuli・4 分鐘）', url: 'https://www.youtube.com/watch?v=cXCPEMRN4kY' }
+  ],
+  warning: '動作放慢、在舒服的範圍內做；下背會刺痛的動作先跳過。'
+};
+/* 收操 5 分鐘（只需要「已完成」勾選） */
+const COOLDOWN = {
+  text: '每個動作 30 秒，慢慢呼吸',
+  items: ['胸前伸展（手扶門框，身體慢慢往前）', '背闊伸展（雙手拉著單槓，屁股往後微蹲）', '弓箭步髖屈肌伸展（左右各 30 秒）', '嬰兒式（跪坐，手往前伸，放鬆下背）']
+};
+
+/* 共用文字（原始課表在兩天重複出現的內容） */
+const TXT_LATERAL = '他原本的水瓶側平舉。手往斜前方約 30 度抬，抬到比肩膀略低，拇指微朝上，在不痛的範圍內做。水瓶握輕一點、手腕打直。原本的「前平舉」先拿掉：伏地挺身已經練很多前肩，再加前平舉，肩膀前側負擔太重。派克伏地挺身是過頭推的動作，又要用手腕撐地，等復健師同意後再加回來。';
+const TXT_HIIT3 = '每個動作做 30 秒、休息 20 秒（原地慢走，不要完全停下），4 個動作算一輪，做 3 輪（約 10 分鐘）。動的時候要全力做快，喘到只能講幾個字才對；全部不跳，對下背和膝蓋比較友善。';
+const TXT_HIIT2 = '每個動作做 30 秒、休息 20 秒（原地慢走，不要完全停下），4 個動作算一輪，練腿日腿比較累，做 2 輪（約 7 分鐘），動作換成不用蹲的。動的時候要全力做快，喘到只能講幾個字才對；全部不跳，對下背和膝蓋比較友善。';
+const HIIT_MOVES_UPPER = ['快速原地高抬腿（手一起擺）', '快速出拳（左右連打）', '交替後跨弓箭步（加快速度）', '左右滑步'];
+const HIIT_MOVES_LOWER = ['快速原地高抬腿（手一起擺）', '快速出拳（左右連打）', '左右滑步', '原地快跑（輕踩）'];
+
+/** 建立動作資料（沒有的欄位一律為 null，不自行編造） */
+function makeExercise(o) {
+  const base = {
+    id: null, day: null, order: 0, moveKey: null, name: '', type: 'reps',
+    prescription: '', muscleGroup: null, category: null, equipment: null,
+    sets: null, repMin: null, repMax: null, duration: null, perSide: false,
+    restSeconds: null, instructions: null, alternative: null, warning: null,
+    notes: null, pending: null, videos: [], hiitMoves: null
+  };
+  const ex = Object.assign(base, o);
+  if (!ex.moveKey) ex.moveKey = ex.id;
+  return ex;
+}
+
+const DAYS = [
+  {
+    id: 'd1', kind: 'formal', weekday: 0, label: '週一', short: '上肢 A', code: 'Upper A',
+    title: '上肢 A：胸＋背', focus: '推拉日 · 約 60 分鐘',
+    header: 'Day 1（週一）｜上肢 A：胸＋背（推拉日 · 約 60 分鐘）',
+    warmup: WARMUP_UPPER, cooldown: COOLDOWN,
+    exercises: [
+      makeExercise({ id: 'd1_01', order: 1, moveKey: 'pushup', name: '伏地挺身（握拳或握把）', warning: '手腕',
+        prescription: '4 組 × 6–10 下', sets: 4, repMin: 6, repMax: 10, restSeconds: 60,
+        muscleGroup: '胸', category: 'chest', equipment: '徒手',
+        instructions: '握拳或用伏地挺身握把，讓手腕保持直的，對腕隧道比較友善。身體從頭到腳一直線，肚子和屁股收緊，腰才不會塌。雙手約肩膀 1.5 倍寬，手肘往斜後方約 45 度（不要往兩側大開，對肩膀比較友善）。楷教練的發力提示：想像雙手用力往中間「合掌」互推，比較容易感覺到胸肌。' }),
+      makeExercise({ id: 'd1_02', order: 2, moveKey: 'band_pullup', name: '阻力帶輔助引體向上', warning: '肩・手腕',
+        prescription: '3 組 × 2–4 下', sets: 3, repMin: 2, repMax: 4, restSeconds: 60,
+        muscleGroup: '背', category: 'back', equipment: '阻力帶＋單槓',
+        instructions: '環狀帶套在單槓，單膝或單腳踩進去。現在的帶子最輕、幫忙很少，能做 2 下乾淨的就很好；買到粗的帶子後改用粗的，目標拉到 3–6 下。肩膀痛或手麻就停。' }),
+      makeExercise({ id: 'd1_03', order: 3, moveKey: 'band_chest_squeeze', name: '阻力帶單邊擠胸', warning: '肩',
+        prescription: '3 組 × 12–15 下（每邊）', sets: 3, repMin: 12, repMax: 15, perSide: true, restSeconds: 30,
+        muscleGroup: '胸', category: 'chest', equipment: '阻力帶＋單槓／桌腳',
+        instructions: '他原本就在做的動作。帶子固定在胸口高度的側邊，手肘微彎固定角度，像抱樹一樣把手往身體中線擠，頂點停 1 秒、擠一下胸。帶子套在手掌上就好，不用用力握。手往後打開時只開到跟身體同一平面，不要往後拉太多，肩膀前側才不會被拉扯。' }),
+      makeExercise({ id: 'd1_04', order: 4, moveKey: 'band_seated_row', name: '阻力帶坐姿划船', warning: '腰',
+        prescription: '3 組 × 12–15 下', sets: 3, repMin: 12, repMax: 15, restSeconds: 60,
+        muscleGroup: '背', category: 'back', equipment: '阻力帶＋桌腳',
+        instructions: '帶子套桌腳，坐地膝蓋微彎，挺胸不駝背，往肚臍方向拉、夾緊肩胛骨停 1 秒。下背不舒服就改站姿或單膝跪姿拉。' }),
+      makeExercise({ id: 'd1_05', order: 5, moveKey: 'lateral_raise', name: '側平舉（水瓶或阻力帶）', warning: '肩',
+        prescription: '3 組 × 12–15 下', sets: 3, repMin: 12, repMax: 15, restSeconds: 30,
+        muscleGroup: '側肩', category: 'shoulders', equipment: '水瓶／阻力帶',
+        instructions: TXT_LATERAL }),
+      makeExercise({ id: 'd1_06', order: 6, moveKey: 'band_face_pull', name: '阻力帶面拉',
+        prescription: '2 組 × 12–15 下', sets: 2, repMin: 12, repMax: 15, restSeconds: 30,
+        muscleGroup: '後肩', category: 'shoulders', equipment: '阻力帶＋單槓',
+        instructions: '帶子掛在比臉高一點的地方，往臉拉的同時雙手往兩側分開、手肘抬高，最後「夾鈔票」停 1 秒。肩膀復健常見的好動作，用細的帶子做。' }),
+      makeExercise({ id: 'd1_07', order: 7, moveKey: 'band_triceps', name: '阻力帶三頭下壓',
+        prescription: '2 組 × 12–15 下', sets: 2, repMin: 12, repMax: 15, restSeconds: 30,
+        muscleGroup: '三頭', category: 'arms', equipment: '阻力帶＋單槓',
+        instructions: '帶子掛單槓，手肘夾在身體兩側不動，只用前臂往下壓到伸直。手腕保持直的，用手掌根壓帶子，不要彎手腕。' }),
+      makeExercise({ id: 'd1_08', order: 8, moveKey: 'band_curl', name: '阻力帶二頭彎舉', warning: '手腕',
+        prescription: '2 組 × 12–15 下', sets: 2, repMin: 12, repMax: 15, restSeconds: 30,
+        muscleGroup: '二頭', category: 'arms', equipment: '阻力帶',
+        instructions: '雙腳踩帶子，手肘貼身不前後晃，往上彎舉再慢慢放下。手腕保持直的，不要往內勾。' }),
+      makeExercise({ id: 'd1_09', order: 9, moveKey: 'bird_dog', name: '鳥狗式', warning: '腰',
+        prescription: '3 組 × 8–10 下（每邊）', sets: 3, repMin: 8, repMax: 10, perSide: true, restSeconds: 20,
+        muscleGroup: '核心', category: 'core', equipment: '徒手',
+        instructions: '四足跪姿（手可以握拳撐地），對側手腳慢慢伸直，停 2 秒再收回。背保持平，像背上放了一杯水。' }),
+      makeExercise({ id: 'd1_10', order: 10, moveKey: 'hiit_upper', name: '居家 HIIT', type: 'hiit',
+        prescription: '3 輪 × 4 個動作，每個動作做 30 秒、休息 20 秒（原地慢走）', sets: 3, duration: 30, restSeconds: 20,
+        muscleGroup: null, category: 'cardio', equipment: null, hiitMoves: HIIT_MOVES_UPPER,
+        instructions: TXT_HIIT3 })
+    ]
+  },
+  {
+    id: 'd2', kind: 'formal', weekday: 1, label: '週二', short: '下肢 A', code: 'Lower A',
+    title: '下肢 A：深蹲為主', focus: '腿日（大腿前側＋臀）· 約 50–60 分鐘',
+    header: 'Day 2（週二）｜下肢 A：深蹲為主（腿日（大腿前側＋臀）· 約 50–60 分鐘）',
+    warmup: WARMUP_LOWER, cooldown: COOLDOWN,
+    exercises: [
+      makeExercise({ id: 'd2_01', order: 1, moveKey: 'box_squat', name: '箱式深蹲（坐到椅子）', warning: '腰',
+        prescription: '4 組 × 12–15 下', sets: 4, repMin: 12, repMax: 15, restSeconds: 60,
+        muscleGroup: '腿', category: 'legs', equipment: '椅子',
+        instructions: '屁股往後坐到輕碰椅子再站起來，深度固定很安全，下背不容易代償。輕鬆了就照楷教練的進階版「三下一上」：蹲到底、上來三分之一再蹲到底，重複三次才站起來一次；也可以把阻力帶套在膝蓋上方往外撐。' }),
+      makeExercise({ id: 'd2_02', order: 2, moveKey: 'bulgarian_split', name: '保加利亞分腿蹲',
+        prescription: '3 組 × 8–12 下（每邊）', sets: 3, repMin: 8, repMax: 12, perSide: true, restSeconds: 60,
+        muscleGroup: '腿＋臀', category: 'legs', equipment: '椅子',
+        instructions: '後腳背放椅子上，前腳往下蹲到後膝快碰地。上身微前傾、核心收緊。很酸，是居家練腿效果最好的動作之一。' }),
+      makeExercise({ id: 'd2_03', order: 3, moveKey: 'sumo_squat', name: '相撲蹲', warning: '腰',
+        prescription: '3 組 × 12–15 下', sets: 3, repMin: 12, repMax: 15, restSeconds: 60,
+        muscleGroup: '大腿內側＋臀', category: 'legs', equipment: '徒手（可抱水瓶）',
+        instructions: '他原本就在做的動作。雙腳比肩寬、腳尖朝外，膝蓋跟腳尖同方向，背打直往下蹲，蹲到背還能保持直的深度就好，不用手碰地。原本的「寬距深蹲手碰地」跟這個重複，而且彎腰碰地對下背負擔大，先拿掉。輕鬆了就胸前抱一瓶 2 公升水，或用「三下一上」。' }),
+      makeExercise({ id: 'd2_04', order: 4, moveKey: 'band_side_walk', name: '阻力帶側走',
+        prescription: '3 組 × 12–15 下（每邊）', sets: 3, repMin: 12, repMax: 15, perSide: true, restSeconds: 30,
+        muscleGroup: '臀中肌', category: 'legs', equipment: '阻力帶',
+        instructions: '帶子套膝蓋上方或腳踝，微蹲往側邊走，腳尖朝前。幫助膝蓋和骨盆穩定。' }),
+      makeExercise({ id: 'd2_05', order: 5, moveKey: 'side_plank', name: '側棒式', warning: '腰', type: 'time',
+        prescription: '3 組 × 20 秒（每邊）', sets: 3, duration: 20, perSide: true, restSeconds: 20,
+        muscleGroup: '核心', category: 'core', equipment: '徒手',
+        instructions: '手肘撐在肩膀正下方（用手肘撐，不壓手腕），身體側面成一直線，左右各一次算一組。輕鬆了加到 30 秒。' }),
+      makeExercise({ id: 'd2_06', order: 6, moveKey: 'hiit_lower', name: '居家 HIIT', type: 'hiit',
+        prescription: '2 輪 × 4 個動作，每個動作做 30 秒、休息 20 秒（原地慢走）', sets: 2, duration: 30, restSeconds: 20,
+        category: 'cardio', hiitMoves: HIIT_MOVES_LOWER, instructions: TXT_HIIT2 })
+    ]
+  },
+  {
+    id: 'd3', kind: 'formal', weekday: 3, label: '週四', short: '上肢 B', code: 'Upper B',
+    title: '上肢 B：背＋胸＋肩', focus: '推拉日 · 約 60 分鐘',
+    header: 'Day 3（週四）｜上肢 B：背＋胸＋肩（推拉日 · 約 60 分鐘）',
+    warmup: WARMUP_UPPER, cooldown: COOLDOWN,
+    exercises: [
+      makeExercise({ id: 'd3_01', order: 1, moveKey: 'scap_pullup', name: '肩胛引體', warning: '肩・手腕',
+        prescription: '3 組 × 6–10 下', sets: 3, repMin: 6, repMax: 10, restSeconds: 60,
+        muscleGroup: '背', category: 'back', equipment: '單槓',
+        instructions: '吊在單槓上手臂伸直，只靠把肩膀往下沉，讓身體上升幾公分再放下。學會用背出力，是引體向上的基礎，對肩膀穩定也好。腳可以踩椅子分擔重量，減少手的負擔。' }),
+      makeExercise({ id: 'd3_02', order: 2, moveKey: 'band_lat_pulldown', name: '阻力帶跪姿下拉',
+        prescription: '3 組 × 12–15 下', sets: 3, repMin: 12, repMax: 15, restSeconds: 60,
+        muscleGroup: '背闊', category: 'back', equipment: '阻力帶＋單槓',
+        instructions: '帶子掛單槓，跪在下方，手肘往褲子口袋方向拉，感覺腋下兩側出力。帶子可以套在手腕上，不用握。' }),
+      makeExercise({ id: 'd3_03', order: 3, moveKey: 'slow_pushup', name: '慢速伏地挺身', warning: '手腕',
+        prescription: '3 組 × 5–8 下', sets: 3, repMin: 5, repMax: 8, restSeconds: 60,
+        muscleGroup: '胸＋三頭', category: 'chest', equipment: '徒手',
+        instructions: '下放數 3 秒、底部停 1 秒，再正常推起。下數少但肌肉受刺激的時間長，很適合增肌。一樣握拳。' }),
+      makeExercise({ id: 'd3_04', order: 4, moveKey: 'band_one_arm_row', name: '阻力帶單臂划船',
+        prescription: '3 組 × 10–12 下（每邊）', sets: 3, repMin: 10, repMax: 12, perSide: true, restSeconds: 60,
+        muscleGroup: '背', category: 'back', equipment: '阻力帶＋桌腳／單槓',
+        instructions: '帶子固定在桌腳或單槓，單手往側腰方向拉，身體不要轉。帶子可以套在手腕上拉。' }),
+      makeExercise({ id: 'd3_05', order: 5, moveKey: 'bottle_reverse_fly', name: '水瓶反向飛鳥（胸靠椅背）',
+        prescription: '3 組 × 12–15 下', sets: 3, repMin: 12, repMax: 15, restSeconds: 30,
+        muscleGroup: '後肩＋上背', category: 'shoulders', equipment: '水瓶＋椅子',
+        instructions: '楷教練的站姿反向飛鳥護腰版：胸口靠在椅背或趴在床邊，手臂微彎、拇指朝外，往兩側抬到跟身體同高，夾鈔票停 1 秒。練後肩，平衡伏地挺身練很多的前肩，對肩膀復健也有幫助。' }),
+      makeExercise({ id: 'd3_06', order: 6, moveKey: 'lateral_raise', name: '側平舉（水瓶或阻力帶）', warning: '肩',
+        prescription: '3 組 × 12–15 下', sets: 3, repMin: 12, repMax: 15, restSeconds: 30,
+        muscleGroup: '側肩', category: 'shoulders', equipment: '水瓶／阻力帶',
+        instructions: TXT_LATERAL }),
+      makeExercise({ id: 'd3_07', order: 7, moveKey: 'band_hammer_curl', name: '阻力帶錘式彎舉', warning: '手腕',
+        prescription: '2 組 × 12–15 下', sets: 2, repMin: 12, repMax: 15, restSeconds: 30,
+        muscleGroup: '二頭', category: 'arms', equipment: '阻力帶',
+        instructions: '掌心相對彎舉，練前臂和二頭外側。手腕保持直的。' }),
+      makeExercise({ id: 'd3_08', order: 8, moveKey: 'dead_bug', name: '死蟲式', warning: '腰',
+        prescription: '3 組 × 8–10 下（每邊）', sets: 3, repMin: 8, repMax: 10, perSide: true, restSeconds: 20,
+        muscleGroup: '核心', category: 'core', equipment: '徒手',
+        instructions: '躺地手腳朝天，下背壓緊地板，對側手腳慢慢往外伸再收回。下背離地就是伸太遠了。' }),
+      makeExercise({ id: 'd3_09', order: 9, moveKey: 'hiit_upper', name: '居家 HIIT', type: 'hiit',
+        prescription: '3 輪 × 4 個動作，每個動作做 30 秒、休息 20 秒（原地慢走）', sets: 3, duration: 30, restSeconds: 20,
+        category: 'cardio', hiitMoves: HIIT_MOVES_UPPER, instructions: TXT_HIIT3 })
+    ]
+  },
+  {
+    id: 'd4', kind: 'formal', weekday: 5, label: '週六', short: '下肢 B', code: 'Lower B',
+    title: '下肢 B：臀＋大腿後側', focus: '腿日（臀＋後側）· 約 50–60 分鐘',
+    header: 'Day 4（週六）｜下肢 B：臀＋大腿後側（腿日（臀＋後側）· 約 50–60 分鐘）',
+    warmup: WARMUP_LOWER, cooldown: COOLDOWN,
+    exercises: [
+      makeExercise({ id: 'd4_01', order: 1, moveKey: 'band_glute_bridge', name: '阻力帶臀橋（護腰版）', warning: '腰',
+        prescription: '3 組 × 10–15 下', sets: 3, repMin: 10, repMax: 15, restSeconds: 30,
+        muscleGroup: '臀', category: 'legs', equipment: '阻力帶',
+        instructions: '他之前做臀橋時右下背會刺痛，可以先做下方收藏影片裡的「椅子 90/90 骨盆後傾呼吸」，再照這個順序做：①先「骨盆後傾」，肚臍往地板壓、下背貼地；②夾緊屁股，才用腳跟推地抬起來；③只抬到肩膀、髖部、膝蓋成一直線就停，不要再往上頂，抬太高下背就會拱起來；④頂點停 2 秒，慢慢放下。腳跟離屁股約一個手掌遠，帶子套在膝蓋上方輕輕往外撐。 做的時候只要有刺痛就停（痠是正常的，刺痛不是），改做替代動作，並告訴復健師是右邊、哪個動作會痛。' }),
+      makeExercise({ id: 'd4_02', order: 2, moveKey: 'band_leg_curl', name: '阻力帶俯臥腿後勾',
+        prescription: '3 組 × 12–15 下', sets: 3, repMin: 12, repMax: 15, restSeconds: 30,
+        muscleGroup: '大腿後側', category: 'legs', equipment: '阻力帶＋桌腳',
+        instructions: '帶子一端套桌腳、一端套腳踝，趴著把腳跟往屁股勾，慢慢放回。不用彎腰的大腿後側訓練，對下背友善。' }),
+      makeExercise({ id: 'd4_03', order: 3, moveKey: 'reverse_lunge', name: '反向弓箭步', warning: '腰',
+        prescription: '3 組 × 8–12 下（每邊）', sets: 3, repMin: 8, repMax: 12, perSide: true, restSeconds: 60,
+        muscleGroup: '腿＋臀', category: 'legs', equipment: '徒手（可扶椅子）',
+        instructions: '他原本做的弓箭步分腿蹲的變化版：一腳往後跨一大步，往下蹲到兩邊膝蓋都約 90 度，再用前腳腳跟推回來。往後跨比往前跨更不傷膝蓋，平衡不好就扶著椅子。上身保持直立、核心收緊。' }),
+      makeExercise({ id: 'd4_04', order: 4, moveKey: 'box_squat_31', name: '箱式深蹲「三下一上」', warning: '腰',
+        prescription: '3 組 × 8–12 下', sets: 3, repMin: 8, repMax: 12, restSeconds: 60,
+        muscleGroup: '腿', category: 'legs', equipment: '椅子',
+        instructions: '楷教練的進階節奏：蹲到底、上來三分之一再蹲到底，重複三次才完全站起來，算 1 下。肌肉受力時間長，下數少也很累。屁股一樣輕碰椅子，背保持直的。' }),
+      makeExercise({ id: 'd4_05', order: 5, moveKey: 'single_calf_raise', name: '單腳提踵',
+        prescription: '3 組 × 12–15 下（每邊）', sets: 3, repMin: 12, repMax: 15, perSide: true, restSeconds: 30,
+        muscleGroup: '小腿', category: 'legs', equipment: '徒手＋瑜伽磚（原課表：階梯）',
+        notes: '實際做法：用瑜伽磚代替樓梯，前腳掌站在瑜伽磚邊緣，腳跟放到最低再踮到最高。',
+        instructions: '前腳掌站在樓梯邊緣（手輕扶牆），腳跟放到最低再踮到最高，頂點停 1 秒。' }),
+      makeExercise({ id: 'd4_06', order: 6, moveKey: 'reverse_crunch', name: '反向捲腹', warning: '腰',
+        prescription: '3 組 × 10–12 下', sets: 3, repMin: 10, repMax: 12, restSeconds: 20,
+        muscleGroup: '腹', category: 'core', equipment: '徒手',
+        instructions: '躺著屈膝，把膝蓋往胸口捲、臀部稍離地，慢慢放回。下背貼地，不要甩。' }),
+      makeExercise({ id: 'd4_07', order: 7, moveKey: 'hiit_lower', name: '居家 HIIT', type: 'hiit',
+        prescription: '2 輪 × 4 個動作，每個動作做 30 秒、休息 20 秒（原地慢走）', sets: 2, duration: 30, restSeconds: 20,
+        category: 'cardio', hiitMoves: HIIT_MOVES_LOWER, instructions: TXT_HIIT2 })
+    ]
+  }
+];
+
+/* =====================================================================
+   替代動作（新版課表「可換成」）
+   - text：新版課表「可換成」那一行原文。
+   - options：可以在卡片上互換的動作。次數依新版課表；組數與休息沿用原主要動作。
+   - ref：替代動作本身就是課表裡的主要動作時，顯示那個動作的要點與 ⚠，紀錄也合併（moveKey 相同）。
+   - category：肌群統計依「實際做的動作」分類。
+   ===================================================================== */
+const ALT_SHOULDER_ER = { name: '阻力帶肩外旋', moveKey: 'alt_ext_rotation', presc: '12–15 下', repMin: 12, repMax: 15, category: 'shoulders' };
+const ALT_LEG_3MIN = { name: '3 分鐘腿部訓練（只做輕鬆版）', moveKey: 'alt_leg_3min', light: true, type: 'time', duration: 180, sets: 1,
+  presc: '1 次 × 3 分鐘（替代整個 HIIT）', category: 'cardio',
+  note: '不想做 HIIT 的日子可以替代；困難版有跳躍，先不要。做 1 次、完整 3 分鐘就算完成當天的 HIIT 替代項目，不和 HIIT 重複計算。',
+  videos: [{ label: '3 分鐘腿部訓練（只做輕鬆版）', url: 'https://www.facebook.com/reel/1646625090504015' }] };
+const ALT_TABLE = {
+  d1_01: { text: '跪姿伏地挺身（握拳）（8–12 下）、上斜伏地挺身（握拳）（8–12 下）', options: [
+    { name: '跪姿伏地挺身（握拳）', moveKey: 'alt_knee_pushup', presc: '8–12 下', repMin: 8, repMax: 12, category: 'chest' },
+    { name: '上斜伏地挺身（握拳）', moveKey: 'alt_incline_pushup', presc: '8–12 下', repMin: 8, repMax: 12, category: 'chest' }] },
+  d1_02: { text: '阻力帶跪姿下拉（12–15 下）、肩胛引體（6–10 下）', options: [
+    { name: '阻力帶跪姿下拉', moveKey: 'band_lat_pulldown', ref: 'd3_02', presc: '12–15 下', repMin: 12, repMax: 15 },
+    { name: '肩胛引體', moveKey: 'scap_pullup', ref: 'd3_01', presc: '6–10 下', repMin: 6, repMax: 10 }] },
+  d1_03: { text: '阻力帶單邊擠胸（小範圍）（12–15 下，每邊）、跪姿伏地挺身（握拳）（8–12 下）', options: [
+    { name: '阻力帶單邊擠胸（小範圍）', moveKey: 'alt_chest_squeeze_short', presc: '12–15 下（每邊）', repMin: 12, repMax: 15, perSide: true, category: 'chest' },
+    { name: '跪姿伏地挺身（握拳）', moveKey: 'alt_knee_pushup', presc: '8–12 下', repMin: 8, repMax: 12, category: 'chest' }] },
+  d1_04: { text: '阻力帶站姿划船（12–15 下）', options: [
+    { name: '阻力帶站姿划船', moveKey: 'alt_standing_row', presc: '12–15 下', repMin: 12, repMax: 15, category: 'back' }] },
+  d1_05: { text: '阻力帶肩外旋（12–15 下）', options: [ALT_SHOULDER_ER] },
+  d1_09: { text: '死蟲式（8–10 下，每邊）', options: [
+    { name: '死蟲式', moveKey: 'dead_bug', ref: 'd3_08', presc: '8–10 下（每邊）', repMin: 8, repMax: 10, perSide: true }] },
+  d2_01: { text: '沙發深蹲（墊書）（12–15 下）', options: [
+    { name: '沙發深蹲（墊書）', moveKey: 'alt_sofa_squat', presc: '12–15 下', repMin: 12, repMax: 15, category: 'legs' }] },
+  d2_02: { text: '弓箭步分腿蹲（8–12 下，每邊）', options: [
+    { name: '弓箭步分腿蹲', moveKey: 'alt_split_squat', presc: '8–12 下（每邊）', repMin: 8, repMax: 12, perSide: true, category: 'legs' }] },
+  d2_03: { text: '箱式深蹲（坐到椅子）（12–15 下）', options: [
+    { name: '箱式深蹲（坐到椅子）', moveKey: 'box_squat', ref: 'd2_01', presc: '12–15 下', repMin: 12, repMax: 15 }] },
+  d2_05: { text: '跪姿側棒式（20 秒，每邊）', options: [
+    { name: '跪姿側棒式', moveKey: 'alt_knee_side_plank', type: 'time', duration: 20, presc: '20 秒（每邊）', perSide: true, category: 'core' }] },
+  d3_01: { text: '阻力帶直臂下壓（12–15 下）', options: [
+    { name: '阻力帶直臂下壓', moveKey: 'alt_straight_arm_pulldown', presc: '12–15 下', repMin: 12, repMax: 15, category: 'back' }] },
+  d3_03: { text: '上斜慢速伏地挺身（6–10 下）、跪姿慢速伏地挺身（6–10 下）', options: [
+    { name: '上斜慢速伏地挺身', moveKey: 'alt_incline_slow_pushup', presc: '6–10 下', repMin: 6, repMax: 10, category: 'chest' },
+    { name: '跪姿慢速伏地挺身', moveKey: 'alt_knee_slow_pushup', presc: '6–10 下', repMin: 6, repMax: 10, category: 'chest' }] },
+  d3_06: { text: '阻力帶肩外旋（12–15 下）', options: [ALT_SHOULDER_ER] },
+  d3_08: { text: '鳥狗式（8–10 下，每邊）', options: [
+    { name: '鳥狗式', moveKey: 'bird_dog', ref: 'd1_09', presc: '8–10 下（每邊）', repMin: 8, repMax: 10, perSide: true }] },
+  d4_01: { text: '阻力帶蚌殼式（12–15 下，每邊）', options: [
+    { name: '阻力帶蚌殼式', moveKey: 'alt_clamshell', presc: '12–15 下（每邊）', repMin: 12, repMax: 15, perSide: true, category: 'legs' }] },
+  d4_03: { text: '弓箭步分腿蹲（8–12 下，每邊）', options: [
+    { name: '弓箭步分腿蹲', moveKey: 'alt_split_squat', presc: '8–12 下（每邊）', repMin: 8, repMax: 12, perSide: true, category: 'legs' }] },
+  d4_04: { text: '箱式深蹲（坐到椅子）（12–15 下）', options: [
+    { name: '箱式深蹲（坐到椅子）', moveKey: 'box_squat', ref: 'd2_01', presc: '12–15 下', repMin: 12, repMax: 15 }] },
+  d4_06: { text: '死蟲式（8–10 下，每邊）', options: [
+    { name: '死蟲式', moveKey: 'dead_bug', ref: 'd3_08', presc: '8–10 下（每邊）', repMin: 8, repMax: 10, perSide: true }] },
+  // HIIT 的輕鬆版替代（來自新版「收藏的影片 › 腿部有氧」）
+  d1_10: { text: '3 分鐘腿部訓練（只做輕鬆版）：不想做 HIIT 的日子可以替代；困難版有跳躍，先不要', options: [ALT_LEG_3MIN] },
+  d2_06: { text: '3 分鐘腿部訓練（只做輕鬆版）：不想做 HIIT 的日子可以替代；困難版有跳躍，先不要', options: [ALT_LEG_3MIN] },
+  d3_09: { text: '3 分鐘腿部訓練（只做輕鬆版）：不想做 HIIT 的日子可以替代；困難版有跳躍，先不要', options: [ALT_LEG_3MIN] },
+  d4_07: { text: '3 分鐘腿部訓練（只做輕鬆版）：不想做 HIIT 的日子可以替代；困難版有跳躍，先不要', options: [ALT_LEG_3MIN] }
+};
+
+/** 依版本取得動作資料：altIndex 為 null 時是原動作，數字時是第幾個替代動作 */
+function variantDef(def, altIndex) {
+  const alts = def.alternatives || [];
+  if (altIndex === null || altIndex === undefined || !alts[altIndex]) return def;
+  const a = alts[altIndex];
+  const ref = a.ref ? EX[a.ref] : null;
+  const sets = a.sets || def.sets;                    // 組數沿用原主要動作（3 分鐘腿部訓練為 1 次）
+  return Object.assign({}, def, {
+    isAlt: true, altIndex, baseName: def.name, name: a.name, moveKey: a.moveKey, light: !!a.light,
+    type: a.type || (ref ? ref.type : 'reps'),
+    sets, repMin: a.repMin ?? null, repMax: a.repMax ?? null, duration: a.duration ?? null,
+    perSide: !!a.perSide, restSeconds: a.light ? null : def.restSeconds,   // 休息沿用原主要動作
+    prescription: a.light ? a.presc : `${sets} 組 × ${a.presc}`,
+    inheritNote: a.light ? null : `組數與休息沿用原動作（${def.sets} 組、休息 ${def.restSeconds} 秒），次數依新版課表`,
+    category: a.category || (ref ? ref.category : def.category),
+    muscleGroup: ref ? ref.muscleGroup : null, equipment: ref ? ref.equipment : null,
+    warning: ref ? ref.warning : def.warning,
+    instructions: ref ? ref.instructions : (a.note || null),
+    notes: ref ? ref.notes : null, videos: a.videos || (ref ? ref.videos : []),
+    hiitMoves: null, alternative: null, alternatives: [], pending: null, inherited: false
+  });
+}
+function variantName(def, altIndex) { return variantDef(def, altIndex).name; }
+
+/* 補上 day 欄位，並建立查表 */
+const DAY = {};
+const EX = {};
+DAYS.forEach(d => { DAY[d.id] = d; d.exercises.forEach(e => {
+  e.day = d.id;
+  e.alternative = ALT_TABLE[e.id] ? ALT_TABLE[e.id].text : null;      // 「可換成」原文
+  e.alternatives = ALT_TABLE[e.id] ? ALT_TABLE[e.id].options : [];
+  EX[e.id] = e;
+}); });
+const FORMAL_DAYS = DAYS.filter(d => d.kind === 'formal');
+
+/* 不明確、需要確認的地方（目前沒有；有的話會顯示在「訓練 › 課表」頁面最下方） */
+const DATA_GAPS = [];
+
+/* 使用者已確認的器材與做法 */
+const GEAR = { bandLb: 15, bandLabel: '15 磅環狀帶', bottleKg: 1.2, bottleLabel: '水瓶 1.2 公升' };
+const CONFIRMED_NOTES = [
+  '居家 HIIT：每個動作做 30 秒、休息 20 秒，輪與輪之間也是休息 20 秒。',
+  '3 分鐘腿部訓練是 HIIT 的輕鬆版替代：做 1 次、完整 3 分鐘就算完成當天的 HIIT 替代項目，不和 HIIT 重複計算。',
+  '替代動作沿用原主要動作的組數與休息時間，次數依新版課表。',
+  `阻力帶是 ${GEAR.bandLb} 磅環狀帶；水瓶是 1.2 公升（約 ${GEAR.bottleKg} kg）。`,
+  '單腳提踵用瑜伽磚代替樓梯。',
+  '熱身與收操只需要「已完成」勾選，不逐組記錄。',
+  '訓練量（kg）只計算有填重量的組數。阻力帶的拉力會隨拉長程度改變，所以記成「阻力設定」，不換算成公斤。'
+];
+
+/* 收藏的影片（可以做的）：只當參考，不記錄訓練、不給經驗值 */
+const VIDEO_LIBRARY = [
+  { title: '🦴 肩膀保養', note: '肩膀還在復健，先給復健師看過再做；每個動作只做不痛的範圍。', items: [
+    { name: '彈力帶多角度肩膀熱身', desc: '上肢日練前可以加做，用最輕的帶子', url: 'https://www.facebook.com/reel/949421910811414' },
+    { name: '重建你的旋轉袖', desc: '物理治療師示範，2 組 × 10–15 下', url: 'https://www.facebook.com/reel/1584391929573758' },
+    { name: '10 個健康肩膀運動', desc: '每招 25–30 秒，挑不痛的做，每週 2–3 次', url: 'https://www.facebook.com/reel/3459656760885582' },
+    { name: '強化背部與肩膀 10 招', desc: '每招 20–30 秒、2–3 組，跟上一支輪流做', url: 'https://www.facebook.com/reel/1175855108446038' }] },
+  { title: '🧘 下背與骨盆', note: '越做越舒服才是對的，刺痛就停。', items: [
+    { name: '椅子 90/90 骨盆後傾呼吸', desc: '平躺、雙腳放椅子上，大腿夾毛巾，腳跟輕拖椅邊、下背貼地，做 10 次深呼吸，每天 1–2 組；臀橋前先做', url: 'https://www.facebook.com/reel/3002570133411704' },
+    { name: '骨盆控制與髖關節活動', desc: '每個動作左右各 10 下，慢慢做、配合呼吸', url: 'https://www.facebook.com/reel/1500301648796971' },
+    { name: '改善圓背 3 招（趴姿）', desc: '每招約 1 分鐘，手往上抬到不痛的高度就好', url: 'https://www.facebook.com/reel/2372579346844256' }] },
+  { title: '🌿 伸展放鬆', note: '練完收操或休息日做。', items: [
+    { name: '物理治療師 3 招伸展', desc: '改善腰痠背痛、圓肩，每招約 1 分鐘', url: 'https://www.facebook.com/reel/1725304755436213' },
+    { name: '椅子輔助腿後側伸展', desc: '左右各 30 秒 × 2，背保持直的，不用勉強碰地', url: 'https://www.facebook.com/reel/1758428802247130' },
+    { name: '5 分鐘晨間活動流', desc: '早上起床做；手撐地的動作握拳或改用前臂撐', url: 'https://www.facebook.com/reel/1575092811077802' }] },
+  { title: '✋ 手麻（腕隧道）', note: '慢慢做、只做到微微緊，麻感變重就停，先問醫師或復健師；手麻時不要用力甩手。', items: [
+    { name: '手麻怎麼辦？2 招', desc: '大拇指、食指麻是正中神經，照影片的正中神經滑動做 5–8 下', url: 'https://www.youtube.com/shorts/ItanK_lEQ-M' },
+    { name: '手指、手臂麻一招', desc: '復健科醫師示範，一樣只做到微微緊', url: 'https://www.youtube.com/shorts/LT7P3IQoHZE' }] },
+  { title: '🏃 腿部有氧', note: null, items: [
+    { name: '3 分鐘腿部訓練（只做輕鬆版）', desc: '不想做 HIIT 的日子可以替代；困難版有跳躍，先不要', url: 'https://www.facebook.com/reel/1646625090504015' }] }
+];
+
+/* =====================================================================
+   2. 遊戲內容
+   ===================================================================== */
+const SLOTS = [
+  { id: 'weapon', name: '武器', char: 'w' },
+  { id: 'helmet', name: '頭盔', char: 'h' },
+  { id: 'armor', name: '胸甲', char: 'a' },
+  { id: 'gloves', name: '手套', char: 'g' },
+  { id: 'boots', name: '鞋子', char: 'f' },
+  { id: 'accessory', name: '飾品', char: 'x' }
+];
+
+/** 裝備：只影響遊戲數值與外觀，不影響訓練內容。
+ *  unlock.type：start 初始 / level 等級 / ach 成就 / boss 擊敗 Boss / shop 金幣購買 */
+const ITEMS = [
+  { id: 'w_wood', slot: 'weapon', name: '木劍', color: '#c28569', wtype: 'sword', stats: { str: 1 }, unlock: { type: 'start' }, desc: '每個冒險者的第一把劍。' },
+  { id: 'w_iron', slot: 'weapon', name: '鐵劍', color: '#94b0c2', wtype: 'sword', stats: { str: 3 }, unlock: { type: 'level', value: 5 }, desc: '持續訓練的證明。' },
+  { id: 'w_band', slot: 'weapon', name: '彈力鞭', color: '#a7f070', wtype: 'whip', stats: { str: 2, dex: 2 }, unlock: { type: 'ach', id: 'pr1' }, desc: '用阻力帶的韌性鍛造而成。' },
+  { id: 'w_axe', slot: 'weapon', name: '山嶺戰斧', color: '#ef7d57', wtype: 'axe', stats: { str: 5 }, unlock: { type: 'boss', id: 'mountain' }, desc: '山嶺巨人留下的戰斧。' },
+  { id: 'w_hero', slot: 'weapon', name: '勇者之劍', color: '#73eff7', wtype: 'sword', stats: { str: 8, dex: 3 }, unlock: { type: 'boss', id: 'castle' }, desc: '擊敗怠惰魔王的傳說之劍。' },
+  { id: 'w_rainbow', slot: 'weapon', name: '彩虹劍', color: '#ff8fb1', wtype: 'sword', stats: { str: 2, dex: 2 }, unlock: { type: 'shop', price: 500 }, desc: '外觀華麗的收藏品。' },
+
+  { id: 'h_band', slot: 'helmet', name: '布頭巾', color: '#b13e53', stats: { vit: 1 }, unlock: { type: 'start' }, desc: '綁上它，冒險開始。' },
+  { id: 'h_leather', slot: 'helmet', name: '皮帽', color: '#8a5a3b', stats: { vit: 2 }, unlock: { type: 'level', value: 3 }, desc: '旅人常戴的帽子。' },
+  { id: 'h_iron', slot: 'helmet', name: '鐵盔', color: '#94b0c2', stats: { vit: 4 }, unlock: { type: 'boss', id: 'forest' }, desc: '古樹守衛守護的頭盔。' },
+  { id: 'h_ice', slot: 'helmet', name: '冰晶冠', color: '#73eff7', stats: { vit: 5, end: 2 }, unlock: { type: 'boss', id: 'snow' }, desc: '冰霜巨龍的寶物。' },
+  { id: 'h_gold', slot: 'helmet', name: '金色頭盔', color: '#ffcd75', stats: { vit: 2 }, unlock: { type: 'shop', price: 300 }, desc: '閃閃發亮的收藏品。' },
+
+  { id: 'a_cloth', slot: 'armor', name: '旅人衣', color: '#3b5dc9', stats: { end: 1 }, unlock: { type: 'start' }, desc: '輕便好活動。' },
+  { id: 'a_leather', slot: 'armor', name: '皮甲', color: '#8a5a3b', stats: { end: 2, vit: 1 }, unlock: { type: 'level', value: 6 }, desc: '耐用的皮革護甲。' },
+  { id: 'a_chain', slot: 'armor', name: '鎖子甲', color: '#566c86', stats: { end: 4, vit: 2 }, unlock: { type: 'level', value: 12 }, desc: '一環扣一環，像每一次訓練。' },
+  { id: 'a_dragon', slot: 'armor', name: '龍鱗甲', color: '#38b764', stats: { end: 6, vit: 4 }, unlock: { type: 'ach', id: 's100' }, desc: '累積 100 次訓練的傳說護甲。' },
+
+  { id: 'g_cloth', slot: 'gloves', name: '布手套', color: '#f4f4f4', stats: { dex: 1 }, unlock: { type: 'start' }, desc: '普通的手套。' },
+  { id: 'g_wrist', slot: 'gloves', name: '護腕手套', color: '#41a6f6', stats: { dex: 2, vit: 1 }, unlock: { type: 'ach', id: 'check5' }, desc: '手腕保持直的！' },
+  { id: 'g_fist', slot: 'gloves', name: '握拳拳套', color: '#b13e53', stats: { str: 2, dex: 1 }, unlock: { type: 'level', value: 8 }, desc: '伏地挺身記得握拳。' },
+
+  { id: 'b_straw', slot: 'boots', name: '草鞋', color: '#c2a36b', stats: { dex: 1 }, unlock: { type: 'start' }, desc: '走在草地上很舒服。' },
+  { id: 'b_wind', slot: 'boots', name: '疾風靴', color: '#a7f070', stats: { dex: 3 }, unlock: { type: 'ach', id: 'lower10' }, desc: '腿部訓練者的獎勵。' },
+  { id: 'b_desert', slot: 'boots', name: '沙漠靴', color: '#ef7d57', stats: { dex: 3, end: 2 }, unlock: { type: 'boss', id: 'desert' }, desc: '沙蠍王守護的靴子。' },
+
+  { id: 'acc_none', slot: 'accessory', name: '（無）', color: null, stats: {}, unlock: { type: 'start' }, desc: '不戴飾品。' },
+  { id: 'acc_badge', slot: 'accessory', name: '村莊勳章', color: '#ffcd75', stats: { end: 1 }, unlock: { type: 'boss', id: 'village' }, desc: '擊敗沙發巨像的紀念。' },
+  { id: 'acc_heart', slot: 'accessory', name: '守護之心', color: '#ff7a8f', stats: { vit: 2, end: 1 }, unlock: { type: 'ach', id: 'safe' }, desc: '懂得保護身體的冒險者才走得遠。' },
+  { id: 'acc_star', slot: 'accessory', name: '金星徽章', color: '#ffcd75', stats: { end: 3 }, unlock: { type: 'ach', id: 'week8' }, desc: '規律冒險者的徽章。' },
+  { id: 'acc_cape', slot: 'accessory', name: '紅披風', color: '#b13e53', cape: true, stats: { dex: 1 }, unlock: { type: 'shop', price: 200 }, desc: '風一吹就很帥。' }
+];
+const ITEM = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+
+/** 世界地圖：關卡依「累積正式訓練次數」解鎖，區域依「等級」解鎖。
+ *  Boss 只看累積成果，不需要額外訓練。 */
+const REGIONS = [
+  { id: 'village', name: '起始村莊', color: '#38b764', levelReq: 1,
+    stages: [{ req: 1, m: 'm_v1' }, { req: 2, m: 'm_v2' }, { req: 3, m: 'm_v3' }], boss: { m: 'b_village', req: 4, levelReq: 2, gold: 50 } },
+  { id: 'forest', name: '綠色森林', color: '#257179', levelReq: 4,
+    stages: [{ req: 6, m: 'm_f1' }, { req: 8, m: 'm_f2' }, { req: 10, m: 'm_f3' }], boss: { m: 'b_forest', req: 12, levelReq: 5, gold: 100 } },
+  { id: 'mountain', name: '岩石山脈', color: '#566c86', levelReq: 8,
+    stages: [{ req: 15, m: 'm_m1' }, { req: 18, m: 'm_m2' }, { req: 21, m: 'm_m3' }], boss: { m: 'b_mountain', req: 24, levelReq: 9, gold: 150 } },
+  { id: 'desert', name: '沙漠遺跡', color: '#c2a36b', levelReq: 13,
+    stages: [{ req: 28, m: 'm_d1' }, { req: 32, m: 'm_d2' }, { req: 36, m: 'm_d3' }], boss: { m: 'b_desert', req: 40, levelReq: 14, gold: 200 } },
+  { id: 'snow', name: '冰雪之地', color: '#73eff7', levelReq: 19,
+    stages: [{ req: 45, m: 'm_s1' }, { req: 50, m: 'm_s2' }, { req: 55, m: 'm_s3' }], boss: { m: 'b_snow', req: 60, levelReq: 20, gold: 260 } },
+  { id: 'castle', name: '最終城堡', color: '#5d275d', levelReq: 26,
+    stages: [{ req: 68, m: 'm_c1' }, { req: 76, m: 'm_c2' }, { req: 84, m: 'm_c3' }], boss: { m: 'b_castle', req: 100, levelReq: 28, gold: 500 } }
+];
+const REGION = Object.fromEntries(REGIONS.map(r => [r.id, r]));
+
+const MONSTERS = {
+  m_v1: { name: '拖延史萊姆', shape: 'slime', color: '#a7f070', desc: '總是說「明天再開始」。' },
+  m_v2: { name: '滑手機蝙蝠', shape: 'bat', color: '#5d275d', desc: '在螢幕光裡飛來飛去。' },
+  m_v3: { name: '軟綿綿蘑菇', shape: 'beast', color: '#ef7d57', desc: '讓人想一直賴在床上。' },
+  b_village: { name: '沙發巨像', shape: 'boss', color: '#b13e53', desc: '起始村莊的 Boss，用柔軟的坐墊困住冒險者。' },
+  m_f1: { name: '藤蔓史萊姆', shape: 'slime', color: '#38b764', desc: '黏在樹上不肯下來。' },
+  m_f2: { name: '森林蝙蝠', shape: 'bat', color: '#257179', desc: '晚上特別有精神。' },
+  m_f3: { name: '苔蘚魔像', shape: 'beast', color: '#3e7a4a', desc: '身上長滿青苔，動作很慢。' },
+  b_forest: { name: '古樹守衛', shape: 'boss', color: '#257179', desc: '守護森林的古老巨樹。' },
+  m_m1: { name: '岩石史萊姆', shape: 'slime', color: '#94b0c2', desc: '硬邦邦的史萊姆。' },
+  m_m2: { name: '山洞蝙蝠', shape: 'bat', color: '#333c57', desc: '住在山洞深處。' },
+  m_m3: { name: '岩石魔像', shape: 'beast', color: '#566c86', desc: '一步一步，很有耐力。' },
+  b_mountain: { name: '山嶺巨人', shape: 'boss', color: '#566c86', desc: '山脈的主人，力大無窮。' },
+  m_d1: { name: '沙丘史萊姆', shape: 'slime', color: '#ffcd75', desc: '熱到快融化了。' },
+  m_d2: { name: '遺跡蝙蝠', shape: 'bat', color: '#c2a36b', desc: '守著古老的寶藏。' },
+  m_d3: { name: '木乃伊魔像', shape: 'beast', color: '#e8d8b0', desc: '全身纏滿繃帶。' },
+  b_desert: { name: '沙蠍王', shape: 'boss', color: '#ef7d57', desc: '沙漠遺跡的霸主。' },
+  m_s1: { name: '冰晶史萊姆', shape: 'slime', color: '#73eff7', desc: '冷冰冰的。' },
+  m_s2: { name: '雪原蝙蝠', shape: 'bat', color: '#f4f4f4', desc: '在暴風雪中飛翔。' },
+  m_s3: { name: '雪人魔像', shape: 'beast', color: '#c8e6f0', desc: '圓滾滾的雪人。' },
+  b_snow: { name: '冰霜巨龍', shape: 'boss', color: '#41a6f6', desc: '冰雪之地的古龍。' },
+  m_c1: { name: '暗影史萊姆', shape: 'slime', color: '#333c57', desc: '躲在城堡角落。' },
+  m_c2: { name: '城堡蝙蝠', shape: 'bat', color: '#b13e53', desc: '城堡的守夜者。' },
+  m_c3: { name: '黑鐵騎士', shape: 'beast', color: '#29366f', desc: '魔王的忠實部下。' },
+  b_castle: { name: '怠惰魔王', shape: 'boss', color: '#5d275d', desc: '最終 Boss。只有長期累積的冒險者能擊敗它。' }
+};
+
+/** 成就：重視長期累積，不只獎勵連續打卡；休息與保養也有成就。
+ *  prog(ctx) 回傳 [目前數值, 目標數值] */
+const ACHIEVEMENTS = [
+  { id: 'first', icon: '⚔️', name: '初次冒險', desc: '完成第一次正式訓練。', gold: 20, prog: c => [c.formal, 1] },
+  { id: 's10', icon: '🛡️', name: '持之以恆', desc: '累積完成 10 次正式訓練。', gold: 50, prog: c => [c.formal, 10] },
+  { id: 's30', icon: '🗡️', name: '穩健旅人', desc: '累積完成 30 次正式訓練。', gold: 80, prog: c => [c.formal, 30] },
+  { id: 's50', icon: '🏰', name: '半百勇者', desc: '累積完成 50 次正式訓練。', gold: 120, prog: c => [c.formal, 50] },
+  { id: 's100', icon: '👑', name: '長期旅程', desc: '累積完成 100 次正式訓練。', gold: 300, prog: c => [c.formal, 100] },
+  { id: 'upper10', icon: '💪', name: '上肢鍛鍊者', desc: '完成 10 次上肢訓練（上肢 A / B）。', gold: 50, prog: c => [c.upper, 10] },
+  { id: 'lower10', icon: '🦵', name: '腿部訓練者', desc: '完成 10 次下肢訓練（下肢 A / B）。', gold: 50, prog: c => [c.lower, 10] },
+  { id: 'allDays', icon: '🧭', name: '四方修行', desc: '四個訓練日都至少完成一次。', gold: 40, prog: c => [c.distinctDays, 4] },
+  { id: 'pr1', icon: '📈', name: '力量成長', desc: '任一動作的表現比過去紀錄進步（只和同一個動作、同一種單位比較）。', gold: 40, prog: c => [c.prCount, 1] },
+  { id: 'pr10', icon: '🚀', name: '穩定進步', desc: '累積 10 次動作進步紀錄。', gold: 100, prog: c => [c.prCount, 10] },
+  { id: 'week1', icon: '⭐', name: '完美一週', desc: '在同一週完整完成 4 個正式訓練日的課表。', gold: 50, prog: c => [c.goalWeeks, 1] },
+  { id: 'week8', icon: '🌟', name: '規律冒險者', desc: '累積 8 週，每週 4 練都完整完成（不需要連續）。', gold: 150, prog: c => [c.goalWeeks, 8] },
+  { id: 'check5', icon: '🩺', name: '傾聽身體', desc: '完成 5 次隔天身體檢查。', gold: 40, prog: c => [c.checks, 5] },
+  { id: 'safe', icon: '❤️', name: '聰明的冒險者', desc: '感到疼痛時，選擇替代動作或跳過。安全第一。', gold: 30, prog: c => [c.safeChoices, 1] },
+  { id: 'explorer', icon: '🗺️', name: '冒險家', desc: '解鎖第一張新地圖：綠色森林。', gold: 40, prog: c => [c.level, REGIONS[1].levelReq] },
+  { id: 'boss1', icon: '🐉', name: '初戰告捷', desc: '擊敗第一個 Boss。', gold: 50, prog: c => [c.bosses, 1] },
+  { id: 'lv10', icon: '🔟', name: 'Lv 10 冒險者', desc: '角色達到 10 級。', gold: 60, prog: c => [c.level, 10] },
+  { id: 'lv20', icon: '🏅', name: 'Lv 20 冒險者', desc: '角色達到 20 級。', gold: 120, prog: c => [c.level, 20] },
+  { id: 'lv30', icon: '🏆', name: 'Lv 30 傳說', desc: '角色達到 30 級。', gold: 200, prog: c => [c.level, 30] }
+];
+
+/** 經驗值與金幣規則（簡單、固定，不和重量或訓練量掛鉤） */
+const REWARD = {
+  exercise: { exp: 10, gold: 5 },        // 每個「完整完成」或「因疼痛安全跳過」的動作（不看重量）
+  exercisePartial: { exp: 5, gold: 2 },  // 部分完成的動作（有做就有，但比完整少）
+  formalComplete: { exp: 50, gold: 20 }, // 完整課表：每個動作都完整完成或疼痛安全跳過
+  weekGoal: { exp: 100, gold: 50 },      // 同一週 4 個正式訓練日都「完整完成課表」
+  nextDayCheck: { exp: 5, gold: 2 }      // 隔天身體檢查（不論結果好壞都一樣）
+};
+
+/* =====================================================================
+   3. 資料保存（三個獨立的 LocalStorage key）
+   - 訓練紀錄：真實資料，重置遊戲不會動到
+   - 遊戲進度：EXP、金幣、裝備、成就、Boss
+   - 設定
+   ===================================================================== */
+const KEYS = { training: 'pfr.training.v1', game: 'pfr.game.v1', settings: 'pfr.settings.v1' };
+
+function defaultTraining() { return { version: 1, sessions: [], active: null }; }
+function defaultGame() {
+  return {
+    version: 1, name: '冒險者', exp: 0, gold: 0,
+    awarded: {}, dayFlags: {}, weekGoals: {}, checkAwarded: {},
+    achievements: {}, bosses: {}, inventory: [],
+    equipped: { weapon: 'w_wood', helmet: 'h_band', armor: 'a_cloth', gloves: 'g_cloth', boots: 'b_straw', accessory: 'acc_none' },
+    createdAt: Date.now()
+  };
+}
+function defaultSettings() { return { version: 1, sound: true, vibrate: true }; }
+
+function loadJSON(key, fallbackFn) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallbackFn();
+    return Object.assign(fallbackFn(), JSON.parse(raw));
+  } catch (err) {
+    console.warn('讀取失敗', key, err);
+    return fallbackFn();
+  }
+}
+function saveJSON(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); return true; }
+  catch (err) { toast('⚠ 儲存失敗：瀏覽器空間不足或被禁止。請先匯出備份。'); return false; }
+}
+
+let training = loadJSON(KEYS.training, defaultTraining);
+let game = loadJSON(KEYS.game, defaultGame);
+let settings = loadJSON(KEYS.settings, defaultSettings);
+game.equipped = Object.assign(defaultGame().equipped, game.equipped || {});
+
+function saveTraining() {
+  if (training.active) training.active.lastTouch = Date.now();
+  saveJSON(KEYS.training, training);
+}
+function saveGame() { saveJSON(KEYS.game, game); }
+function saveSettings() { saveJSON(KEYS.settings, settings); }
+
+/* =====================================================================
+   4. 工具函式
+   ===================================================================== */
+const pad = n => String(n).padStart(2, '0');
+const WEEKDAY_ZH = ['一', '二', '三', '四', '五', '六', '日'];
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function ymd(d = new Date()) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+function parseYmd(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function weekdayIdx(s) { return (parseYmd(s).getDay() + 6) % 7; } // 0 = 週一
+function weekKey(s) { const d = parseYmd(s); d.setDate(d.getDate() - weekdayIdx(s)); return ymd(d); }
+function addDays(s, n) { const d = parseYmd(s); d.setDate(d.getDate() + n); return ymd(d); }
+function fmtDate(s) { const d = parseYmd(s); return `${d.getMonth() + 1}/${d.getDate()}（${WEEKDAY_ZH[weekdayIdx(s)]}）`; }
+function fmtDur(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+  return h ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+function fmtMin(ms) { return `${Math.max(0, Math.round(ms / 60000))} 分鐘`; }
+/** 空字串視為「沒有資料」（例如徒手訓練不填重量） */
+function num(v) { if (v === '' || v === null || v === undefined) return null; const n = Number(v); return Number.isFinite(n) ? n : null; }
+function fmtNum(n) { return (Math.round(n * 10) / 10).toLocaleString('zh-TW'); }
+
+/* =====================================================================
+   5. 訓練資料查詢與統計
+   ===================================================================== */
+function completedSessions() {
+  return training.sessions.filter(s => s.status === 'completed')
+    .sort((a, b) => (a.date === b.date ? a.startedAt - b.startedAt : a.date < b.date ? -1 : 1));
+}
+function doneSets(e) { return e.sets.filter(x => x.done); }
+
+/** 動作結果（四種）：
+ *  full    完整完成：規定組數（不含額外組）全部完成
+ *  safe    安全處理：因疼痛／手麻而跳過
+ *  partial 部分完成：有完成組數，但沒有做完規定組數
+ *  skip    一般跳過：因時間、器材或其他原因跳過
+ *  none    還沒做 */
+/** 規定要做的組：不含額外組，也不含「本次減量」拿掉的組（dropped） */
+function isTargetSet(x) { return !x.extra && !x.dropped; }
+/** 這次還需要做的組（含額外組，不含減量的組） */
+function isOpenSet(x) { return !x.done && !x.dropped; }
+/** HIIT 是否已用「3 分鐘腿部訓練」完整替代（做 1 次、滿 3 分鐘） */
+function isLightDone(e) {
+  const def = EX[e.exerciseId]; if (!def || !def.alternatives.some(a => a.light)) return false;
+  return doneSets(e).some(x => { const v = variantDef(def, x.alt); return v.light && num(x.seconds) !== null && num(x.seconds) >= v.duration; });
+}
+function exerciseOutcome(e) {
+  if (e.status === 'skipped') return e.skipReason === 'pain' ? 'safe' : 'skip';
+  if (isLightDone(e)) return 'full';   // 替代方案完成＝當天 HIIT 完成（只算一次，不和 HIIT 輪數重複）
+  const target = e.sets.filter(isTargetSet);
+  if (target.length && target.every(x => x.done)) return 'full';
+  return doneSets(e).length ? 'partial' : 'none';
+}
+const OUTCOME_LABEL = { full: '完整完成', safe: '疼痛安全跳過', partial: '部分完成', skip: '其他跳過', none: '未做' };
+/** 完整課表的條件：每個動作都是「完整完成」或「疼痛安全跳過」 */
+function isComplete(e) { const o = exerciseOutcome(e); return o === 'full' || o === 'safe'; }
+/** 有參與：完成至少一組，或疼痛安全跳過 */
+function isParticipated(e) { const o = exerciseOutcome(e); return o === 'full' || o === 'safe' || o === 'partial'; }
+/** 這次訓練有沒有實際內容（用來計算「有參與」的訓練次數） */
+function sessionCounts(s) { return s.exercises.some(isParticipated); }
+/** 這次訓練是不是完整完成課表 */
+function sessionFull(s) { return s.exercises.length > 0 && s.exercises.every(isComplete); }
+
+function sessionsInWeek(wk) { return completedSessions().filter(s => weekKey(s.date) === wk && sessionCounts(s)); }
+/** 本週「有參與」的正式訓練日 */
+function formalDaysDoneInWeek(wk) {
+  return new Set(sessionsInWeek(wk).filter(s => s.kind === 'formal').map(s => s.dayId));
+}
+/** 本週「完整完成課表」的正式訓練日 */
+function formalDaysFullInWeek(wk) {
+  return new Set(sessionsInWeek(wk).filter(s => s.kind === 'formal' && sessionFull(s)).map(s => s.dayId));
+}
+
+/** 階段計時：扣掉暫停時間 */
+function elapsedMs(s) {
+  const end = s.endedAt || Date.now();
+  const paused = (s.pausedMs || 0) + (s.pausedAt ? (end - s.pausedAt) : 0);
+  return Math.max(0, end - s.startedAt - paused);
+}
+
+/** 一次訓練的摘要。訓練量只計算「有填重量」的組數（重量 × 次數）。 */
+function summarize(s) {
+  let exCount = 0, setCount = 0, volume = 0, weightedSets = 0;
+  const outcomes = { full: 0, safe: 0, partial: 0, skip: 0, none: 0 };
+  s.exercises.forEach(e => {
+    outcomes[exerciseOutcome(e)]++;
+    const ds = doneSets(e);
+    if (ds.length) exCount++;
+    setCount += ds.length;
+    ds.forEach(x => {
+      const w = num(x.weight), r = num(x.reps);
+      if (w && w > 0 && r && r > 0) { volume += w * r; weightedSets++; }
+    });
+  });
+  return { exCount, setCount, volume, weightedSets, durationMs: elapsedMs(s), total: s.exercises.length,
+    outcomes, full: sessionFull(s) };
+}
+
+/** 把一個動作完成的組，依「實際做的版本」（原動作／替代動作）分組 */
+function groupSetsByVariant(e) {
+  const def = EX[e.exerciseId]; if (!def) return [];
+  const groups = {};
+  doneSets(e).forEach(x => {
+    const v = variantDef(def, x.alt);
+    (groups[v.moveKey] || (groups[v.moveKey] = { v, sets: [] })).sets.push(x);
+  });
+  return Object.values(groups);
+}
+/** 某個動作（moveKey）的歷史：每一組都依當時實際做的版本歸類，原動作與替代動作不會混在一起 */
+function moveHistory(moveKey, excludeId) {
+  const out = [];
+  completedSessions().forEach(s => {
+    if (s.id === excludeId) return;
+    s.exercises.forEach(e => {
+      groupSetsByVariant(e).forEach(g => { if (g.v.moveKey === moveKey) out.push({ session: s, entry: e, sets: g.sets, def: g.v }); });
+    });
+  });
+  return out;
+}
+function lastRecord(moveKey, excludeId) { const h = moveHistory(moveKey, excludeId); return h.length ? h[h.length - 1] : null; }
+
+/** 單次表現：最佳次數（或秒數）、最大重量 */
+function bestOf(sets, type) {
+  let best = null, maxW = null;
+  sets.forEach(x => {
+    const v = type === 'time' ? num(x.seconds) : num(x.reps);
+    if (v !== null && (best === null || v > best)) best = v;
+    const w = num(x.weight);
+    if (w !== null && w > 0 && (maxW === null || w > maxW)) maxW = w;
+  });
+  return { best, maxW };
+}
+
+/** 進步紀錄：同一動作、同一單位才比較；第一次做不算進步 */
+function computePRs() {
+  const bests = {}; // moveKey -> {best, maxW}
+  const prs = [];    // {sessionId, moveKey, kind, from, to}
+  completedSessions().forEach(s => {
+    s.exercises.forEach(e => groupSetsByVariant(e).forEach(({ v: def, sets: ds }) => {
+      if (def.type === 'hiit' || def.light) return;
+      const cur = bestOf(ds, def.type);
+      const prev = bests[def.moveKey];
+      if (prev) {
+        if (cur.best !== null && prev.best !== null && cur.best > prev.best)
+          prs.push({ sessionId: s.id, moveKey: def.moveKey, name: def.name, kind: def.type === 'time' ? '秒數' : '次數', from: prev.best, to: cur.best });
+        else if (cur.maxW !== null && prev.maxW !== null && cur.maxW > prev.maxW)
+          prs.push({ sessionId: s.id, moveKey: def.moveKey, name: def.name, kind: '重量', from: prev.maxW, to: cur.maxW });
+        bests[def.moveKey] = {
+          best: Math.max(prev.best ?? -1, cur.best ?? -1) < 0 ? null : Math.max(prev.best ?? -1, cur.best ?? -1),
+          maxW: Math.max(prev.maxW ?? -1, cur.maxW ?? -1) < 0 ? null : Math.max(prev.maxW ?? -1, cur.maxW ?? -1)
+        };
+      } else {
+        bests[def.moveKey] = cur;
+      }
+    }));
+  });
+  return prs;
+}
+
+/** 連續週數：每週至少練 1 次就算（休息日不會中斷） */
+function weekStreak() {
+  const weeks = new Set(completedSessions().filter(s => s.kind === 'formal' && sessionCounts(s)).map(s => weekKey(s.date)));
+  let wk = weekKey(ymd());
+  if (!weeks.has(wk)) wk = addDays(wk, -7); // 本週還沒練不算中斷
+  let n = 0;
+  while (weeks.has(wk)) { n++; wk = addDays(wk, -7); }
+  return n;
+}
+
+/** 統計數字（成就、屬性、地圖共用） */
+function buildContext() {
+  const sessions = completedSessions().filter(sessionCounts);
+  const formal = sessions.filter(s => s.kind === 'formal');
+  const weeks = {};   // 只算「完整完成課表」的日子
+  formal.filter(sessionFull).forEach(s => { (weeks[weekKey(s.date)] ||= new Set()).add(s.dayId); });
+  let safeChoices = 0, upperSets = 0, lowerSets = 0, coreSets = 0;
+  sessions.forEach(s => s.exercises.forEach(e => {
+    const painAlt = e.painReports && e.painReports.length && doneSets(e).some(x => x.alt !== null && x.alt !== undefined);
+    if (painAlt || (e.status === 'skipped' && e.skipReason === 'pain')) safeChoices++;
+    // 每一組只依「實際做的動作」（原動作或替代動作）分類一次，不重複計算
+    groupSetsByVariant(e).forEach(({ v, sets }) => {
+      const n = sets.length;
+      if (['chest', 'back', 'shoulders', 'arms'].includes(v.category)) upperSets += n;
+      else if (v.category === 'legs') lowerSets += n;
+      else if (v.category === 'core') coreSets += n;
+      // cardio（HIIT 輪數、3 分鐘腿部訓練）、null 或其他未知分類：不計入任何肌群組數
+    });
+  }));
+  return {
+    formal: formal.length,
+    formalFull: formal.filter(sessionFull).length,
+    upper: formal.filter(s => s.dayId === 'd1' || s.dayId === 'd3').length,
+    lower: formal.filter(s => s.dayId === 'd2' || s.dayId === 'd4').length,
+    distinctDays: new Set(formal.map(s => s.dayId)).size,
+    goalWeeks: Object.values(weeks).filter(set => set.size >= 4).length,
+    checks: completedSessions().filter(s => s.nextDay).length,
+    prCount: computePRs().length,
+    safeChoices, upperSets, lowerSets, coreSets,
+    level: levelInfo(game.exp).level,
+    bosses: Object.keys(game.bosses).length
+  };
+}
+
+/** 今日建議：照課表「週一、二、四、六，沒練到就隔天補」 */
+function todaySuggestion() {
+  const today = ymd(), wk = weekKey(today), wi = weekdayIdx(today);
+  const done = formalDaysDoneInWeek(wk);
+  const doneToday = completedSessions().some(s => s.date === today && s.kind === 'formal' && sessionCounts(s));
+  if (doneToday) return { type: 'doneToday' };
+  const due = FORMAL_DAYS.filter(d => d.weekday <= wi && !done.has(d.id));
+  if (due.length) return { type: due[0].weekday === wi ? 'today' : 'makeup', day: due[0] };
+  if (done.size >= 4) return { type: 'weekDone' };
+  return { type: 'rest' };
+}
+
+/** 尚未做的隔天檢查（最近一次正式訓練，日期在今天之前、3 天內） */
+function pendingNextDayCheck() {
+  const today = ymd();
+  const list = completedSessions().filter(s => s.kind === 'formal' && sessionCounts(s));
+  const last = list[list.length - 1];
+  if (!last || last.nextDay) return null;
+  if (last.date >= today || last.date < addDays(today, -3)) return null;
+  return last;
+}
+/** 最近一次隔天檢查變更糟，且之後還沒有再練 → 提醒「下次少一組」 */
+function worseReminder() {
+  const list = completedSessions().filter(s => s.kind === 'formal' && sessionCounts(s));
+  const last = list[list.length - 1];
+  return last && last.nextDay && last.nextDay.result === 'worse' ? last : null;
+}
+
+/* =====================================================================
+   6. 獎勵系統
+   ===================================================================== */
+function expForLevel(L) { return 100 + (L - 1) * 50; } // 從 L 升到 L+1 需要的 EXP
+function levelInfo(exp) {
+  let L = 1, rem = exp;
+  while (L < 99 && rem >= expForLevel(L)) { rem -= expForLevel(L); L++; }
+  return { level: L, cur: rem, need: expForLevel(L), total: exp };
+}
+
+/** 發放一次訓練的獎勵（同一筆紀錄只發一次）。
+ *  - 每個動作固定 EXP，不看重量、不看組數（多做組數不會多拿）
+ *  - 因疼痛跳過的動作照樣給 EXP（不懲罰安全選擇）
+ *  - 同一天只計一次正式訓練獎勵，避免重複刷 */
+function awardSession(s) {
+  if (game.awarded[s.id]) return null;
+  const r = { exp: 0, gold: 0, lines: [] };
+  const flags = game.dayFlags[s.date] || (game.dayFlags[s.date] = {});
+  const sm = summarize(s);
+  const complete = sm.outcomes.full + sm.outcomes.safe;   // 疼痛安全跳過 = 正向獎勵
+  const partial = sm.outcomes.partial;
+  const add = (rw, label, times = 1) => { if (!times) return; r.exp += rw.exp * times; r.gold += rw.gold * times; r.lines.push(`${label}：+${rw.exp * times} EXP、+${rw.gold * times} G`); };
+
+  if (complete + partial === 0) { r.lines.push('這次沒有完成任何動作，沒有獎勵也沒有懲罰。'); }
+  else if (s.kind === 'formal') {
+    if (flags.formal) r.lines.push('同一天只計算一次正式訓練獎勵，好好休息吧。');
+    else {
+      flags.formal = true;
+      add(REWARD.exercise, `完整完成 ${sm.outcomes.full}＋疼痛安全跳過 ${sm.outcomes.safe}`, complete);
+      add(REWARD.exercisePartial, `部分完成 × ${partial}`, partial);
+      if (sm.full) add(REWARD.formalComplete, '完整完成當日課表');
+      else r.lines.push('有動作只完成部分組數或因其他原因跳過，這次不發「完整課表」獎勵（沒有懲罰）。');
+      const wk = weekKey(s.date);
+      if (!game.weekGoals[wk] && formalDaysFullInWeek(wk).size >= 4) {
+        game.weekGoals[wk] = true;
+        add(REWARD.weekGoal, '本週 4 練都完整完成');
+      }
+    }
+  }
+  game.exp += r.exp; game.gold += r.gold;
+  game.awarded[s.id] = { exp: r.exp, gold: r.gold };
+  return r;
+}
+
+function awardNextDayCheck(s) {
+  if (game.checkAwarded[s.id]) return null;
+  game.checkAwarded[s.id] = true;
+  game.exp += REWARD.nextDayCheck.exp; game.gold += REWARD.nextDayCheck.gold;
+  return REWARD.nextDayCheck;
+}
+
+/** 檢查新成就，回傳新解鎖的清單 */
+function checkAchievements() {
+  const ctx = buildContext();
+  const unlocked = [];
+  ACHIEVEMENTS.forEach(a => {
+    if (game.achievements[a.id]) return;
+    const [cur, goal] = a.prog(ctx);
+    if (cur >= goal) {
+      game.achievements[a.id] = Date.now();
+      game.gold += a.gold;
+      unlocked.push(a);
+    }
+  });
+  // 解鎖成就可能讓等級變動 → 再檢查一次（等級類成就）
+  if (unlocked.length) unlocked.push(...checkAchievements());
+  return unlocked;
+}
+
+function isItemUnlocked(item) {
+  const u = item.unlock;
+  if (u.type === 'start') return true;
+  if (u.type === 'level') return levelInfo(game.exp).level >= u.value;
+  if (u.type === 'ach') return !!game.achievements[u.id];
+  if (u.type === 'boss') return !!game.bosses[u.id];
+  if (u.type === 'shop') return game.inventory.includes(item.id);
+  return false;
+}
+function unlockText(item) {
+  const u = item.unlock;
+  if (u.type === 'level') return `Lv ${u.value} 解鎖`;
+  if (u.type === 'ach') { const a = ACHIEVEMENTS.find(x => x.id === u.id); return `成就「${a ? a.name : u.id}」`; }
+  if (u.type === 'boss') { const r = REGION[u.id]; return `擊敗 ${MONSTERS[r.boss.m].name}`; }
+  if (u.type === 'shop') return `商店 ${u.price} G`;
+  return '初始裝備';
+}
+function unlockedItemIds() { return ITEMS.filter(isItemUnlocked).map(i => i.id); }
+
+/** 角色屬性（純遊戲數值，不代表真實體能或醫療測量） */
+function characterStats() {
+  const c = buildContext();
+  const lv = levelInfo(game.exp).level;
+  const base = {
+    str: 5 + Math.floor(c.upperSets / 15) + Math.floor(lv / 2),
+    vit: 5 + Math.floor(c.lowerSets / 15) + Math.floor(lv / 2),
+    dex: 5 + Math.floor(c.coreSets / 10) + Math.floor(lv / 2),
+    end: 5 + Math.floor(c.formal / 2) + Math.floor(lv / 2)   // 新版課表沒有恢復日：只依正式訓練次數與等級
+  };
+  const bonus = { str: 0, vit: 0, dex: 0, end: 0 };
+  Object.values(game.equipped).forEach(id => { const it = ITEM[id]; if (it) Object.entries(it.stats).forEach(([k, v]) => bonus[k] += v); });
+  return { base, bonus };
+}
+
+/** 地圖進度 */
+function stageCleared(region, stage, ctx) { return ctx.level >= region.levelReq && ctx.formal >= stage.req; }
+function bossReady(region, ctx) {
+  return ctx.level >= region.levelReq && region.stages.every(st => stageCleared(region, st, ctx))
+    && ctx.formal >= region.boss.req && ctx.level >= region.boss.levelReq;
+}
+
+/** 依訓練紀錄重新計算遊戲進度（重置後可選用） */
+function rebuildGameFromHistory(keepName) {
+  const name = game.name;
+  game = defaultGame();
+  if (keepName) game.name = name;
+  completedSessions().forEach(s => { awardSession(s); if (s.nextDay) awardNextDayCheck(s); });
+  checkAchievements();
+  saveGame();
+}
+
+/* =====================================================================
+   7. 像素圖形（全部用 SVG 方塊繪製，不需要外部素材）
+   ===================================================================== */
+function spriteSVG(rows, pal, px = 4, cls = '') {
+  const h = rows.length, w = Math.max(...rows.map(r => r.length));
+  let rects = '';
+  rows.forEach((row, y) => {
+    let x = 0;
+    while (x < row.length) {
+      const c = row[x];
+      if (c === '.' || !pal[c]) { x++; continue; }
+      let run = 1;
+      while (row[x + run] === c) run++;
+      rects += `<rect x="${x}" y="${y}" width="${run}" height="1" fill="${pal[c]}"/>`;
+      x += run;
+    }
+  });
+  return `<svg class="sprite ${cls}" viewBox="0 0 ${w} ${h}" width="${w * px}" height="${h * px}" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+}
+
+const HERO_BASE = [
+  '.....hhhhhh.....',
+  '....hhhhhhhh....',
+  '...hhhhhhhhhh...',
+  '...hssssssssh...',
+  '....sesssses....',
+  '....ssssssss....',
+  '.....ssmmss.....',
+  '...aaaaaaaaaa...',
+  '..gaaaaaaaaaag..',
+  '..gaaaaaaaaaag..',
+  '...bbbbbbbbbb...',
+  '...llll..llll...',
+  '...llll..llll...',
+  '...ffff..ffff...',
+  '..fffff..fffff..'
+];
+/** 武器疊在角色右手邊 */
+function weaponOverlay(wtype) {
+  const rows = HERO_BASE.map(() => '.'.repeat(16).split(''));
+  const put = (x, y, c) => { if (rows[y]) rows[y][x] = c; };
+  if (wtype === 'sword') { for (let y = 1; y <= 8; y++) put(14, y, 'w'); put(13, 9, 'k'); put(14, 9, 'k'); put(15, 9, 'k'); put(14, 10, 'k'); }
+  else if (wtype === 'axe') { for (let y = 2; y <= 10; y++) put(14, y, 'k'); put(15, 2, 'w'); put(15, 3, 'w'); put(15, 4, 'w'); put(13, 2, 'w'); put(13, 3, 'w'); }
+  else if (wtype === 'whip') { [[14, 9], [15, 8], [15, 7], [14, 6], [14, 5], [15, 4], [15, 3]].forEach(([x, y]) => put(x, y, 'w')); put(14, 10, 'k'); }
+  return rows.map(r => r.join(''));
+}
+function mergeRows(base, top, under = false) {
+  return base.map((row, y) => row.split('').map((c, x) => {
+    const t = top[y] ? top[y][x] : '.';
+    if (!t || t === '.') return c;
+    return under ? (c === '.' ? t : c) : t;
+  }).join(''));
+}
+function heroSVG(px = 6, equipped = game.equipped) {
+  const it = slot => ITEM[equipped[slot]] || {};
+  const pal = {
+    h: it('helmet').color || '#5d275d', s: '#f6c08e', e: '#1a1c2c', m: '#b13e53',
+    a: it('armor').color || '#3b5dc9', g: it('gloves').color || '#f4f4f4', b: '#333c57',
+    l: '#29366f', f: it('boots').color || '#c2a36b', w: it('weapon').color || '#c28569', k: '#ef7d57',
+    c: it('accessory').color || '#b13e53', x: it('accessory').color || '#ffcd75'
+  };
+  let rows = HERO_BASE.slice();
+  const acc = it('accessory');
+  if (acc.cape) {
+    const cape = HERO_BASE.map((_, y) => (y >= 7 && y <= 12) ? '.c' + '.'.repeat(12) + 'c.' : '.'.repeat(16));
+    rows = mergeRows(rows, cape, true);
+  } else if (acc.color) {
+    const badge = HERO_BASE.map((_, y) => y === 8 ? '......x.........' : '.'.repeat(16));
+    rows = mergeRows(rows, badge);
+  }
+  if (it('weapon').wtype) rows = mergeRows(rows, weaponOverlay(it('weapon').wtype));
+  return spriteSVG(rows, pal, px);
+}
+
+const MONSTER_SHAPES = {
+  slime: ['....oooo....', '..oooooooo..', '.oooooooooo.', '.ooeooooeoo.', 'oooeooooeooo', 'oooooooooooo', 'oooommmmoooo', 'oooooooooooo', '.oooooooooo.'],
+  bat: ['oo..........oo', 'ooo...oo...ooo', 'oooo.oooo.oooo', 'oooooeooeooooo', '.oooooooooooo.', '..ooo.mm.ooo..', '...o......o...'],
+  beast: ['...oooooo...', '..oooooooo..', '..oeooooeo..', '..oooooooo..', '..oommmmoo..', 'oooooooooooo', 'oooooooooooo', 'oo.oooooo.oo', 'oo.oooooo.oo', '...oo..oo...', '...oo..oo...', '..ooo..ooo..'],
+  boss: ['o..............o', 'oo............oo', '.oooooooooooooo.', '..oooooooooooo..', '..ooeooooooeoo..', '..oooooooooooo..', '...oommmmmmoo...', '.oooooooooooooo.', 'oooooooooooooooo', 'oo.oooooooooo.oo', 'o..oooooooooo..o', '...ooo....ooo...', '...ooo....ooo...', '..oooo....oooo..']
+};
+function monsterSVG(id, px = 4, cls = '') {
+  const m = MONSTERS[id];
+  return spriteSVG(MONSTER_SHAPES[m.shape], { o: m.color, e: '#ffcd75', m: '#1a1c2c' }, px, cls);
+}
+
+const ICONS = {
+  home: ['...oo...', '..oooo..', '.oooooo.', 'oooooooo', '.o....o.', '.o.oo.o.', '.o.oo.o.', '.oooooo.'],
+  sword: ['.......o', '......oo', '.....oo.', 'o...oo..', '.o.oo...', '..oo....', '.o.o....', 'o...o...'],
+  hero: ['..oooo..', '..oooo..', '...oo...', '.oooooo.', 'o.oooo.o', '..oooo..', '..o..o..', '..o..o..'],
+  map: ['oooooooo', 'o..o...o', 'o.o.o..o', 'o...o.oo', 'o.o..o.o', 'o..o...o', 'oooooooo', '........'],
+  trophy: ['oooooooo', 'oooooooo', '.oooooo.', '..oooo..', '...oo...', '...oo...', '..oooo..', '.oooooo.']
+};
+function iconSVG(name, color) { return spriteSVG(ICONS[name], { o: color }, 3); }
+
+/* =====================================================================
+   8. 計時器（組間休息、計時動作、HIIT 間歇）
+   以結束時間戳記計算，切到背景回來也會正確。
+   ===================================================================== */
+// cue：這次倒數已經播過的秒數（例如 {3:true, 2:true}），開始新計時、切換 HIIT 階段、調整時間時清空
+const timer = { on: false, mode: 'rest', label: '', endAt: 0, total: 0, pausedLeft: null, phases: null, phaseIdx: 0, onDone: null, cue: {} };
+
+/* ---------- 提示音（Web Audio API） ----------
+   柔和音色：sine 為主、疊一點點 triangle 泛音，像鬧鈴的「叮」，用 GainNode 做淡入淡出避免爆音。
+   iOS Safari：AudioContext 一定要在使用者點擊時建立或 resume，之後計時器數秒後播放才有聲音。 */
+let audioCtx = null, audioMaster = null, audioPrimed = false;
+function audioReady() {
+  if (!settings.sound) return null;                   // 音效關閉：倒數與結束音都不播
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  try {
+    if (!audioCtx) {
+      audioCtx = new AC();
+      audioMaster = audioCtx.createGain();
+      audioMaster.gain.value = 0.55;                  // 整體音量適中
+      audioMaster.connect(audioCtx.destination);
+    }
+    if (audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+    return audioCtx;
+  } catch (e) { return null; }
+}
+/** 在使用者點擊時呼叫：建立／恢復 AudioContext，並播放一個無聲的極短音，讓 iOS 解除靜音限制 */
+function unlockAudio() {
+  const ctx = audioReady();
+  if (!ctx || audioPrimed) return;
+  try {
+    const buf = ctx.createBuffer(1, 1, 22050), src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); src.start(0);
+    audioPrimed = true;
+  } catch (e) { /* 忽略 */ }
+}
+/** 一個柔和的音：淡入 20ms，再以指數曲線淡出 */
+function playTone(freq, startIn, dur, peak) {
+  const ctx = audioCtx, t0 = ctx.currentTime + startIn;
+  [[freq, 'sine', peak], [freq * 2, 'triangle', peak * 0.12]].forEach(([f, type, pk]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(pk, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(audioMaster);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  });
+}
+/** 音效表：[頻率 Hz, 延遲秒, 長度秒, 音量] */
+const SOUNDS = {
+  countdown: [[880, 0, 0.22, 0.2]],                                       // 倒數 3、2、1：短而清楚的一聲
+  end: [[659.25, 0, 0.5, 0.24], [987.77, 0.16, 0.8, 0.22]],               // 時間結束：上行雙音
+  finish: [[523.25, 0, 0.45, 0.22], [659.25, 0.14, 0.45, 0.22], [783.99, 0.28, 0.9, 0.22]], // HIIT 全部結束：三音短旋律
+  toWork: [[659.25, 0, 0.35, 0.2], [880, 0.12, 0.55, 0.22]],              // HIIT 換到「動」：上行雙音
+  toRest: [[783.99, 0, 0.35, 0.2], [587.33, 0.12, 0.6, 0.2]]              // HIIT 換到「休息」：下行雙音
+};
+function playSound(name) {
+  const ctx = audioReady(); if (!ctx) return;
+  try { SOUNDS[name].forEach(([f, d, len, pk]) => playTone(f, d, len, pk)); } catch (e) { /* 忽略 */ }
+}
+/** 其他地方（完成一組、升級、Boss）沿用 beep()，改成同樣柔和的音色 */
+function beep(times = 1, freq = 880) {
+  const ctx = audioReady(); if (!ctx) return;
+  try { for (let i = 0; i < times; i++) playTone(freq, i * 0.16, 0.22, 0.16); } catch (e) { /* 忽略 */ }
+}
+function buzz(pattern) { if (settings.vibrate && navigator.vibrate) navigator.vibrate(pattern); }
+
+function startTimer(seconds, label, mode = 'rest', onDone = null) {
+  Object.assign(timer, { on: true, mode, label, total: seconds, endAt: Date.now() + seconds * 1000, pausedLeft: null, phases: null, phaseIdx: 0, onDone, cue: {} });
+  renderTimer();
+}
+/** 間歇計時：phases = [{sec, label, mode}] */
+function startPhases(phases, onDone) {
+  Object.assign(timer, { phases, phaseIdx: 0, onDone });
+  const p = phases[0];
+  Object.assign(timer, { on: true, mode: p.mode, label: p.label, total: p.sec, endAt: Date.now() + p.sec * 1000, pausedLeft: null, cue: {} });
+  renderTimer();
+}
+function timerLeftMs() { return timer.pausedLeft !== null ? timer.pausedLeft : Math.max(0, timer.endAt - Date.now()); }
+function stopTimer() { timer.on = false; timer.phases = null; timer.cue = {}; renderTimer(); }
+/** 時間到（或手動跳過，skipped = true 時不播提示音；震動維持原本行為） */
+function timerFinished(skipped = false) {
+  const curPhase = timer.phases ? timer.phases[timer.phaseIdx] : null;
+  if (curPhase && curPhase.onEnd) curPhase.onEnd();
+  if (timer.phases && timer.phaseIdx < timer.phases.length - 1) {
+    timer.phaseIdx++;
+    const p = timer.phases[timer.phaseIdx];
+    // 切換到下一個 HIIT 階段：重新計算倒數
+    Object.assign(timer, { mode: p.mode, label: p.label, total: p.sec, endAt: Date.now() + p.sec * 1000, cue: {} });
+    if (!skipped) playSound(p.mode === 'work' ? 'toWork' : 'toRest');
+    buzz(150);
+    renderTimer();
+    return;
+  }
+  if (!skipped) playSound(timer.phases ? 'finish' : 'end');
+  buzz([200, 100, 200]);
+  const cb = timer.onDone;
+  stopTimer();
+  if (cb) cb();
+}
+function renderTimer() {
+  const el = document.getElementById('timerBar');
+  document.body.classList.toggle('timer-on', timer.on);
+  if (!timer.on) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+  el.classList.remove('hidden');
+  el.classList.toggle('work', timer.mode === 'work');
+  const left = timerLeftMs();
+  const pct = timer.total ? Math.max(0, Math.min(100, (left / (timer.total * 1000)) * 100)) : 0;
+  const phaseTxt = timer.phases ? `（${timer.phaseIdx + 1}/${timer.phases.length}）` : '';
+  el.innerHTML = `<div class="inner">
+      <div class="t-num" id="tNum">${fmtDur(Math.ceil(left / 1000) * 1000)}</div>
+      <div class="grow"><div class="t-lbl">${esc(timer.label)} ${phaseTxt}${timer.pausedLeft !== null ? '<span class="yellow">（暫停中）</span>' : ''}</div>
+        <div class="bar thin exp"><i id="tBar" style="width:${pct}%"></i></div></div>
+    </div>
+    <div class="inner"><div class="t-btns grow">
+      <button class="btn ghost" data-act="timerAdj" data-v="-15">−15 秒</button>
+      <button class="btn ghost" data-act="timerAdj" data-v="15">＋15 秒</button>
+      <button class="btn ghost" data-act="timerPause">${timer.pausedLeft !== null ? '▶ 繼續' : '⏸ 暫停'}</button>
+      <button class="btn orange" data-act="timerSkip">跳過 ⏭</button>
+    </div></div>`;
+}
+function tick() {
+  if (timer.on && timer.pausedLeft === null) {
+    const left = timerLeftMs();
+    const n = document.getElementById('tNum'), b = document.getElementById('tBar');
+    if (n) n.textContent = fmtDur(Math.ceil(left / 1000) * 1000);
+    if (b && timer.total) b.style.width = Math.max(0, (left / (timer.total * 1000)) * 100) + '%';
+    if (left <= 0) timerFinished();
+    else {
+      // 倒數 3、2、1：每一秒只播一次（tick 每 250ms 執行，用 timer.cue 記錄已播過的秒數）
+      // 只播「現在這一秒」，不補播被跳過的秒數（例如背景分頁延遲），避免一次響好幾聲
+      const sec = Math.ceil(left / 1000);
+      if (sec <= 3 && !timer.cue[sec]) { timer.cue[sec] = true; playSound('countdown'); }
+    }
+  }
+  const el = document.getElementById('sessElapsed');
+  if (el && training.active) el.textContent = fmtDur(elapsedMs(training.active));
+}
+
+/* 訓練中讓螢幕保持亮著（支援的瀏覽器才會生效） */
+let wakeLock = null;
+async function requestWakeLock() { try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch (e) { /* 忽略 */ } }
+function releaseWakeLock() { try { if (wakeLock) wakeLock.release(); } catch (e) { } wakeLock = null; }
+
+/* =====================================================================
+   9. 畫面
+   ===================================================================== */
+const ui = {
+  tab: 'home', inSession: false, workoutSub: 'plan', planDay: null,
+  open: {}, info: {}, focus: {}, statsMove: null, statsRange: 'all',
+  pre: null, pain: null
+};
+
+function toast(msg, ms = 2600) {
+  const root = document.getElementById('toastRoot');
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  root.appendChild(el);
+  setTimeout(() => el.remove(), ms);
+}
+
+function openModal(title, bodyHtml) {
+  document.getElementById('modalRoot').innerHTML =
+    `<div class="modal-back" data-act="modalBack"><div class="modal" role="dialog" aria-modal="true">
+       <button class="close-x" data-act="closeModal" aria-label="關閉">✕</button>
+       <div class="modal-title">${title}</div>${bodyHtml}</div></div>`;
+}
+function closeModal() { document.getElementById('modalRoot').innerHTML = ''; }
+
+/** 確認視窗（回傳 Promise<boolean>） */
+function confirmDialog({ title, body, okText = '確定', cancelText = '取消', danger = false, requireText = null }) {
+  return new Promise(resolve => {
+    const typeBox = requireText ? `<label class="f mt">請輸入「${esc(requireText)}」確認<input type="text" id="cfType" autocomplete="off"></label><p class="small red hidden" id="cfTypeErr">輸入的文字不正確，沒有執行。</p>` : '';
+    openModal(esc(title), `<div>${body}</div>${typeBox}<div class="btn-row mt">
+      <button class="btn ghost" id="cfNo">${esc(cancelText)}</button>
+      <button class="btn ${danger ? 'red' : 'green'}" id="cfYes">${esc(okText)}</button></div>`);
+    document.getElementById('cfYes').onclick = () => {
+      if (requireText) {   // 必須正確輸入指定文字，否則不關閉、不執行
+        const v = (document.getElementById('cfType').value || '').trim();
+        if (v !== requireText) { document.getElementById('cfTypeErr').classList.remove('hidden'); return; }
+      }
+      closeModal(); resolve(true);
+    };
+    document.getElementById('cfNo').onclick = () => { closeModal(); resolve(false); };
+  });
+}
+
+function render() {
+  const view = document.getElementById('view');
+  const showSession = ui.tab === 'workout' && ui.inSession && training.active;
+  const views = { home: viewHome, workout: showSession ? viewSession : viewWorkout, character: viewCharacter, map: viewMap, achievements: viewAchievements };
+  view.innerHTML = views[ui.tab]();
+  renderTopbar();
+  document.querySelectorAll('#tabbar button').forEach(b => {
+    const on = b.dataset.tab === ui.tab;
+    b.classList.toggle('on', on);
+    b.querySelector('[data-icon]').innerHTML = iconSVG(b.querySelector('[data-icon]').dataset.icon, on ? '#ffcd75' : '#566c86');
+  });
+}
+function renderTopbar() {
+  const lv = levelInfo(game.exp);
+  document.getElementById('tbLevel').textContent = `LV ${lv.level}`;
+  document.getElementById('tbGold').textContent = `G ${game.gold}`;
+}
+
+/* ---------- 共用小元件 ---------- */
+function expBar() {
+  const lv = levelInfo(game.exp);
+  return `<div class="row between small"><span class="px tiny">EXP ${lv.cur}/${lv.need}</span><span class="muted">再 ${lv.need - lv.cur} EXP 升級</span></div>
+    <div class="bar exp mt" style="margin-top:4px"><i style="width:${(lv.cur / lv.need) * 100}%"></i></div>`;
+}
+function warnTag(def) { return def.warning ? `<span class="tag warn">⚠ ${esc(def.warning)}</span>` : ''; }
+function rulesList(list) { return `<ul class="rules">${list.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`; }
+/** 左右側欄位名稱（次數：repsL/repsR；秒數：secondsL/secondsR） */
+function sideKeys(def) { return def.type === 'time' ? ['secondsL', 'secondsR', 'seconds'] : ['repsL', 'repsR', 'reps']; }
+function hasSides(x, def) { const [l, r] = sideKeys(def); return num(x[l]) !== null || num(x[r]) !== null; }
+function setSummaryText(x, def) {
+  const parts = [];
+  const unit = def.type === 'time' ? '秒' : '下';
+  if (def.type === 'hiit') parts.push(x.done ? '已完成本輪' : '');
+  else if (def.perSide && hasSides(x, def)) { const [l, r] = sideKeys(def); parts.push(`左 ${x[l] === '' || x[l] == null ? '—' : x[l]}／右 ${x[r] === '' || x[r] == null ? '—' : x[r]} ${unit}`); }
+  else if (def.type === 'time') { if (num(x.seconds) !== null) parts.push(`${x.seconds} 秒`); }
+  else if (num(x.reps) !== null) parts.push(`${x.reps} 下`);
+  if (num(x.weight) !== null) parts.push(`${x.weight} kg`);
+  if (x.band) parts.push(`帶：${x.band}`);
+  if (x.rir !== '' && x.rir !== undefined && x.rir !== null) parts.push(`RIR ${x.rir}`);
+  if (x.note) parts.push(`📝${x.note}`);
+  return parts.filter(Boolean).join(' · ');
+}
+function lastRecordHTML(def, excludeId) {
+  if (def.type === 'hiit') return '';
+  const rec = lastRecord(def.moveKey, excludeId);
+  if (!rec) return `<div class="last-rec muted">上次紀錄：還沒有紀錄</div>`;
+  const lines = rec.sets.map((x, i) => `第 ${i + 1} 組：${esc(setSummaryText(x, def)) || '—'}`).join('<br>');
+  let hint = '';
+  if (def.type === 'reps' && def.repMax && !def.inherited && rec.sets.length >= def.sets && rec.sets.slice(0, def.sets).every(x => num(x.reps) >= def.repMax)) {
+    hint = `<div class="hint-up">📈 上次「每一組」都做到範圍上限（${def.repMax} 下）。依課表的進步原則，下次可以考慮：放慢下放（3 秒）、多一組、換更強的阻力帶，或換更難的變化式。${def.moveKey === 'band_pullup' || def.moveKey === 'scap_pullup' ? '<br>引體向上路線：肩胛引體 → 粗帶輔助 3–6 下 → 細帶輔助 → 每次最後試 1 下不用輔助的。' : ''}<br><span class="muted">（遊戲只提示，不會自動更改課表）</span></div>`;
+  }
+  return `<div class="last-rec"><b>上次紀錄 · ${fmtDate(rec.session.date)}</b><br>${lines}</div>${hint}`;
+}
+function exerciseInfoHTML(def) {
+  let h = `<div class="info"><span class="lbl">${def.isAlt && !def.light ? '動作要點' : def.light ? '說明' : '動作要點'}</span>${esc(def.instructions || '（新版課表沒有另外寫要點）')}</div>`;
+  if (def.type === 'hiit' && def.hiitMoves) h += `<div class="info"><span class="lbl">動作輪流</span>${def.hiitMoves.map(esc).join(' → ')}</div>`;
+  if (def.isAlt) h += `<div class="info alt"><span class="lbl">原動作</span>${esc(def.baseName)}（可以隨時在卡片上換回來）</div>`;
+  else h += `<div class="info alt"><span class="lbl">可換成（替代動作）</span>${def.alternative ? esc(def.alternative) + ((def.alternatives || []).length ? `<br><span class="tiny muted">訓練時可以在卡片上直接換成：${def.alternatives.map(a => esc(a.name)).join('、')}</span>` : '') : '課表沒有提供替代動作；不舒服可以直接跳過。'}</div>`;
+  if (def.warning) h += `<div class="info warn"><span class="lbl">注意事項</span>⚠ ${esc(def.warning)}：標 ⚠ 的動作請先給復健師看過。疼痛 4 分以上、或手麻變明顯就停下，改做替代動作或跳過。</div>`;
+  if (def.notes) h += `<div class="info"><span class="lbl">你的實際做法</span>${esc(def.notes)}</div>`;
+  if (def.pending) h += `<div class="info pend"><span class="lbl">待確認</span>${esc(def.pending)}</div>`;
+  if (def.videos && def.videos.length) h += `<div class="info"><span class="lbl">參考影片</span>${def.videos.map(v => `<a href="${esc(v.url)}" target="_blank" rel="noopener">▶ ${esc(v.label)}</a>`).join('<br>')}</div>`;
+  return h;
+}
+/** 熱身內容：說明＋影片連結＋提醒 */
+function warmupHTML(w) {
+  return `<p class="small">${esc(w.text)}</p>
+    ${w.videos.map(v => `<div><a href="${esc(v.url)}" target="_blank" rel="noopener">▶ ${esc(v.label)}</a></div>`).join('')}
+    ${w.warning ? `<p class="small" style="margin-top:6px">⚠ ${esc(w.warning)}</p>` : ''}`;
+}
+/** 收操內容 */
+function cooldownHTML(c) {
+  return `<p class="small">${esc(c.text)}</p>${rulesList(c.items)}`;
+}
+function exMetaHTML(def) {
+  return `<div class="ex-meta">
+    ${def.muscleGroup ? `<span class="tag info">部位：${esc(def.muscleGroup)}</span>` : ''}
+    ${def.equipment ? `<span class="tag">器材：${esc(def.equipment)}</span>` : ''}
+    ${def.restSeconds !== null ? `<span class="tag">休息 ${def.restSeconds} 秒</span>` : ''}
+    ${warnTag(def)}${def.pending ? '<span class="tag pending">待確認</span>' : ''}
+  </div><div class="presc">${esc(def.prescription)}</div>`;
+}
+
+/* ---------- 首頁 ---------- */
+function viewHome() {
+  const lv = levelInfo(game.exp);
+  const today = ymd(), wk = weekKey(today);
+  const done = formalDaysDoneInWeek(wk);
+  const fullDone = formalDaysFullInWeek(wk);
+  const sug = todaySuggestion();
+  const check = pendingNextDayCheck();
+  const worse = worseReminder();
+  const last = completedSessions().filter(sessionCounts).slice(-1)[0];
+  let h = '';
+
+  // 角色卡
+  h += `<div class="box gold"><div class="box-title">PLAYER</div>
+    <div class="hero-card"><div class="hero-stage">${heroSVG(6)}</div>
+      <div class="grow"><div class="ex-name">${esc(game.name)}</div>
+        <div class="px yellow" style="font-size:16px;margin:6px 0">LV ${lv.level}</div>
+        ${expBar()}
+        <div class="row between small mt"><span>💰 <b class="yellow">${game.gold}</b> G</span><span>🔥 連續 <b>${weekStreak()}</b> 週有訓練</span></div>
+      </div></div></div>`;
+
+  // 未完成訓練
+  if (training.active) {
+    const s = training.active, d = DAY[s.dayId];
+    const sm = summarize(s);
+    h += `<div class="box warn"><div class="box-title">未完成的訓練</div>
+      <p><b>${esc(d.label)}｜${esc(d.title)}</b></p>
+      <p class="small muted">${fmtDate(s.date)} 開始 · 已完成 ${sm.setCount} 組 · ${s.pausedAt ? '已暫停' : '進行中'}</p>
+      <button class="btn big block yellow" data-act="resumeSession">▶ 繼續訓練</button></div>`;
+  }
+
+  // 隔天檢查
+  if (check) {
+    h += `<div class="box alt"><div class="box-title">隔天身體檢查</div>
+      <p>上次訓練：<b>${fmtDate(check.date)} ${esc(DAY[check.dayId].short)}</b></p>
+      <p class="small">課表守則：24 小時內肩膀、下背回到原本狀態就 OK；變更糟代表量太多，下次少一組。</p>
+      <div class="btn-row"><button class="btn green" data-act="nextDayCheck" data-id="${check.id}" data-r="ok">✓ 回到原本狀態</button>
+      <button class="btn orange" data-act="nextDayCheck" data-id="${check.id}" data-r="worse">✗ 變更糟</button></div>
+      <p class="tiny muted">不論結果都會得到相同的回報獎勵，請照實回報。</p></div>`;
+  } else if (worse) {
+    h += `<div class="box warn"><div class="box-title">身體提醒</div>
+      <p>上次（${fmtDate(worse.date)}）隔天檢查回報「變更糟」。依課表守則：<b>代表量太多，下次少一組。</b></p>
+      <p class="small muted">系統不會自動改課表，請在訓練時自行少做一組。</p></div>`;
+  }
+
+  // 今日建議
+  h += `<div class="box alt"><div class="box-title">TODAY</div>`;
+  if (sug.type === 'today' || sug.type === 'makeup') {
+    const d = sug.day;
+    h += `<p class="small muted">${sug.type === 'makeup' ? `${d.label}還沒練，照課表「沒練到就隔天補」` : `今天是${d.label}`}</p>
+      <h2>${esc(d.short)}｜${esc(d.title)}</h2><p class="small muted">${esc(d.focus)} · ${d.exercises.length} 個動作</p>
+      <button class="btn big block green mt" data-act="startDay" data-day="${d.id}">⚔ 開始訓練</button>
+      <button class="btn block ghost mt" data-act="viewPlan" data-day="${d.id}">查看完整課表</button>`;
+  } else if (sug.type === 'doneToday') {
+    h += `<h2>今天的訓練完成了 🎉</h2><p>好好吃飯、好好休息，恢復也是訓練的一部分。</p>`;
+  } else {
+    h += `<h2>${sug.type === 'weekDone' ? '本週 4 練全部完成！' : '今天是休息日'}</h2>
+      <p class="small">休息不會中斷任何紀錄。${esc(NUTRITION_NOTES[3])}</p>
+      <button class="btn block mt" data-act="openVideos">🎬 看收藏影片（選做，只當參考、不記錄）</button>`;
+  }
+  h += `</div>`;
+
+  // 本週
+  h += `<div class="box"><div class="box-title">THIS WEEK</div>
+    <div class="row between"><b>本週有參與訓練</b><span class="px yellow">${done.size}/4</span></div>
+    <div class="bar gold mt"><i style="width:${Math.min(100, done.size * 25)}%"></i></div>
+    <div class="row between mt"><b>完整完成課表</b><span class="px lime">${fullDone.size}/4</span></div>
+    <div class="bar mt"><i style="width:${Math.min(100, fullDone.size * 25)}%"></i></div>
+    <div class="week-grid">${WEEKDAY_ZH.map((w, i) => {
+      const date = addDays(wk, i);
+      const plan = FORMAL_DAYS.find(d => d.weekday === i);
+      const daySess = completedSessions().filter(s => s.date === date && sessionCounts(s));
+      const did = daySess.map(s => DAY[s.dayId].short + (sessionFull(s) ? '' : '（部分）'));
+      const allFull = daySess.length && daySess.every(sessionFull);
+      return `<div class="week-cell ${date === today ? 'today' : ''} ${did.length ? (allFull ? 'done' : 'part') : ''}">
+        <div class="wd">${w}</div><div class="pl">${plan ? esc(plan.short) : '<span class="dim">休息</span>'}</div>
+        ${did.length ? `<div class="ck">✓</div><div class="tiny">${did.map(esc).join('<br>')}</div>` : ''}</div>`;
+    }).join('')}</div>
+    <p class="tiny muted mt">${esc(PLAN_META.schedule)}。綠色＝完整完成、黃色＝部分完成。</p></div>`;
+
+  // 最近一次
+  if (last) {
+    const sm = summarize(last);
+    const rw = game.awarded[last.id];
+    h += `<div class="box"><div class="box-title">LAST QUEST</div>
+      <p><b>${fmtDate(last.date)}｜${esc(DAY[last.dayId].short)}</b> ${esc(DAY[last.dayId].title)} <span class="tag ${sm.full ? 'ok' : 'warn'}">${sm.full ? '完整完成' : '部分完成'}</span></p>
+      <div class="stat-tiles">
+        <div class="tile"><div class="k">完整／部分完成動作</div><div class="v">${sm.outcomes.full}／${sm.outcomes.partial}</div></div>
+        <div class="tile"><div class="k">完成組數</div><div class="v">${sm.setCount}</div></div>
+        <div class="tile"><div class="k">訓練時間</div><div class="v">${fmtMin(sm.durationMs)}</div></div>
+        <div class="tile"><div class="k">獲得</div><div class="v">${rw ? `+${rw.exp} EXP` : '—'}</div></div>
+      </div>
+      <button class="btn block ghost mt" data-act="histDetail" data-id="${last.id}">查看紀錄</button></div>`;
+  }
+  return h;
+}
+
+/* ---------- 訓練頁（課表 / 紀錄 / 統計） ---------- */
+function viewWorkout() {
+  const subs = [['plan', '📜 課表'], ['history', '📖 紀錄'], ['stats', '📊 統計'], ['videos', '🎬 影片']];
+  let h = `<div class="seg">${subs.map(([k, l]) => `<button class="${ui.workoutSub === k ? 'on' : ''}" data-act="workoutSub" data-sub="${k}">${l}</button>`).join('')}</div>`;
+  if (training.active) {
+    h += `<div class="box warn"><div class="box-title">未完成的訓練</div><p>${esc(DAY[training.active.dayId].title)}（${fmtDate(training.active.date)}）</p>
+      <button class="btn block yellow" data-act="resumeSession">▶ 繼續訓練</button></div>`;
+  }
+  if (ui.workoutSub === 'history') return h + viewHistory();
+  if (ui.workoutSub === 'stats') return h + viewStats();
+  if (ui.workoutSub === 'videos') return h + viewVideos();
+  return h + viewPlan();
+}
+
+function viewPlan() {
+  if (!ui.planDay) { const sug = todaySuggestion(); ui.planDay = sug.day ? sug.day.id : 'd1'; }
+  const d = DAY[ui.planDay];
+  let h = `<div class="seg">${DAYS.map(x => `<button class="${x.id === d.id ? 'on' : ''}" data-act="planDay" data-day="${x.id}">${esc(x.label)}<br><span class="tiny">${esc(x.short)}</span></button>`).join('')}</div>`;
+
+  h += `<div class="box alt"><div class="box-title">${esc(d.code)}</div>
+    <h2>${esc(d.title)}</h2><p class="small muted">${esc(d.header)}</p>
+    <button class="btn big block green mt" data-act="startDay" data-day="${d.id}">⚔ 開始這一天的訓練</button></div>`;
+
+  if (d.warmup) h += `<div class="box"><div class="box-title">熱身</div><b>${esc(d.warmup.title)}</b>${warmupHTML(d.warmup)}</div>`;
+
+  d.exercises.forEach((def, i) => {
+    const key = 'plan_' + def.id;
+    h += `<div class="ex-card">
+      <div class="ex-head" data-act="toggleInfo" data-k="${key}"><div class="ex-num">${pad(i + 1)}</div>
+        <div class="grow"><div class="ex-name">${esc(def.name)}</div>${exMetaHTML(def)}</div></div>
+      <button class="toggle-link" data-act="toggleInfo" data-k="${key}">${ui.info[key] ? '▲ 收合說明' : '▼ 動作說明、注意事項、替代動作'}</button>
+      ${ui.info[key] ? exerciseInfoHTML(def) + lastRecordHTML(def) : ''}
+    </div>`;
+  });
+
+  if (d.cooldown) h += `<div class="box"><div class="box-title">收操 5 分鐘</div>${cooldownHTML(d.cooldown)}</div>`;
+
+  h += `<div class="box warn"><div class="box-title">身體狀況守則</div>${rulesList(SAFETY_RULES)}
+    <p class="tiny muted">疼痛分數是自我感受紀錄，不是醫療診斷。</p></div>
+    <div class="box good"><div class="box-title">怎麼進步</div>${rulesList(PROGRESSION_RULES)}
+    <p class="tiny muted">遊戲會在符合條件時提示，但不會自動更改課表。</p></div>
+    <div class="box"><div class="box-title">飲食搭配</div>${rulesList(NUTRITION_NOTES)}</div>
+    <div class="box"><div class="box-title">課表總覽</div>
+      <ul class="rules"><li>${esc(PLAN_META.schedule)}</li><li>${esc(PLAN_META.split)}</li><li>器材：${esc(PLAN_META.equipment)}<br><span class="small muted">實際：阻力帶 15 磅、水瓶 1.2 公升、單腳提踵用瑜伽磚</span></li><li>${esc(PLAN_META.flow)}</li></ul></div>
+    <div class="box good"><div class="box-title">已確認</div>${rulesList(CONFIRMED_NOTES)}</div>
+    ${DATA_GAPS.length ? `<details class="box"><summary>待確認的資料（${DATA_GAPS.length} 項）</summary>${rulesList(DATA_GAPS)}</details>` : ''}`;
+  return h;
+}
+
+/* ---------- 收藏的影片（只當參考，不記錄、不給經驗值） ---------- */
+function viewVideos() {
+  let h = `<div class="box alt"><div class="box-title">收藏的影片</div>
+    <p class="small">新版課表「收藏的影片（可以做的）」。<b>只當參考，不記錄訓練、不給經驗值。</b></p></div>`;
+  VIDEO_LIBRARY.forEach(cat => {
+    h += `<div class="box"><div class="box-title">${esc(cat.title)}</div>
+      ${cat.note ? `<p class="small">${esc(cat.note)}</p>` : ''}
+      ${cat.items.map(v => `<div class="info"><b>${esc(v.name)}</b><div class="small">${esc(v.desc)}</div><a href="${esc(v.url)}" target="_blank" rel="noopener">▶ 開啟影片</a></div>`).join('')}</div>`;
+  });
+  return h;
+}
+
+/* ---------- 訓練進行中 ---------- */
+function currentSetIndex(e, idx) {
+  const f = ui.focus[idx];
+  if (f !== undefined && e.sets[f] && !e.sets[f].dropped) return f;
+  if (isLightDone(e)) return -1;     // 已用 3 分鐘腿部訓練替代：不再要求其他輪
+  return e.sets.findIndex(isOpenSet);
+}
+function viewSession() {
+  const s = training.active, d = DAY[s.dayId];
+  const handled = s.exercises.filter(e => exerciseOutcome(e) !== 'none').length;
+  const curIdx = s.exercises.findIndex(e => e.status === 'pending');
+  let h = '';
+
+  h += `<div class="box gold sess-head" style="margin-top:6px">
+    <div class="row between"><div class="grow"><span class="tag">${esc(d.label)} · ${esc(d.short)}</span><div class="ex-name">${esc(d.title)}</div></div>
+      <div class="center"><div class="tiny muted">訓練時間</div><div class="elapsed" id="sessElapsed">${fmtDur(elapsedMs(s))}</div></div></div>
+    <div class="bar mt"><i style="width:${(handled / s.exercises.length) * 100}%"></i></div>
+    <div class="row between tiny muted" style="margin-top:4px"><span>動作進度 ${handled}/${s.exercises.length}</span><span>自動保存中</span></div>
+    <div class="btn-row mt">
+      <button class="btn sm ghost" data-act="pauseSession">⏸ 暫停</button>
+      <button class="btn sm ghost" data-act="leaveSession">💾 暫離</button>
+      <button class="btn sm green" data-act="finishSession">🏁 結束</button></div></div>`;
+
+  if (s.pausedAt) {
+    h += `<div class="paused-veil"><div class="px">PAUSED</div><p>訓練已暫停，計時也暫停了。<br>進度已自動保存。</p>
+      <button class="btn big yellow" data-act="resumeTimerSession">▶ 繼續訓練</button>
+      <button class="btn ghost" data-act="leaveSession">回到首頁（保留進度）</button></div>`;
+  }
+
+  // 開始前身體狀況
+  const p = s.precheck;
+  if (p) {
+    const hi = Math.max(p.shoulder, p.back, p.wrist);
+    const stopNames = d.exercises.filter(def => painStopReasons(p, def).length).map(def => def.name);
+    const cls = stopNames.length || hi >= 4 || p.numb === 'worse' ? 'stop' : hi > 0 ? 'mid' : 'ok';
+    h += `<div class="alert ${cls}">開始前：肩 ${p.shoulder} · 下背 ${p.back} · 手腕 ${p.wrist}／手麻：${p.numb === 'worse' ? '比平常明顯' : p.numb === 'same' ? '和平常一樣' : '沒有'}
+      ${stopNames.length ? `<br>⚠ 請停止的動作（已在卡片上標紅）：${stopNames.map(esc).join('、')}。其他動作可以照常做。` : cls === 'stop' ? '<br>⚠ 訓練中只要引起疼痛，就用「回報疼痛」停下。' : ''}</div>`;
+  }
+  if (s.worseNote) h += `<div class="alert mid">📋 上次隔天檢查「變更糟」：依課表守則，這次少做一組。可以在動作卡片按「－ 這次少做一組」，只影響這次紀錄，課表的預設組數不變；做完調整後的組數就算完整完成。<br><span class="small">減量不代表可以帶痛訓練：疼痛 4 分以上或手麻變明顯，一樣請改做替代動作或跳過。</span></div>`;
+
+  h += `<details class="box warn" style="margin-top:16px"><summary>身體狀況守則</summary>${rulesList(SAFETY_RULES)}</details>`;
+
+  if (d.warmup) {
+    h += `<div class="ex-card ${s.warmupDone ? 'done' : ''}"><div class="row between"><b>🔥 ${esc(d.warmup.title)}</b>
+      <label class="row small"><input type="checkbox" data-act="toggleWarmup" ${s.warmupDone ? 'checked' : ''}>已完成</label></div>
+      ${warmupHTML(d.warmup)}</div>`;
+  }
+
+  s.exercises.forEach((e, idx) => { h += sessionCardHTML(s, e, idx, idx === curIdx); });
+
+  if (d.cooldown) {
+    h += `<div class="ex-card ${s.cooldownDone ? 'done' : ''}"><div class="row between"><b>🧊 收操 5 分鐘</b>
+      <label class="row small"><input type="checkbox" data-act="toggleCooldown" ${s.cooldownDone ? 'checked' : ''}>已完成</label></div>
+      ${cooldownHTML(d.cooldown)}</div>`;
+  }
+  h += `<button class="btn big block green" data-act="finishSession" style="margin:10px 3px">🏁 結束訓練並結算</button>`;
+  return h;
+}
+
+function sessionCardHTML(s, e, idx, isCurrent) {
+  const base = EX[e.exerciseId];
+  const def = variantDef(base, e.altIndex);   // 目前選的版本（原動作或替代動作）
+  const statusCls = e.status === 'done' ? 'done' : e.status === 'skipped' ? 'skipped' : def.isAlt ? 'swapped' : painStopReasons(s.precheck, base).length ? 'flagged' : isCurrent ? 'current' : '';
+  const open = ui.open[idx] !== undefined ? ui.open[idx] : e.status === 'pending';
+  const ds = doneSets(e).length;
+  const targetSets = e.sets.filter(isTargetSet).length;
+  const oc = exerciseOutcome(e);
+  const statusTag = oc === 'full' ? '<span class="tag ok">✓ 完整完成</span>'
+    : oc === 'safe' ? '<span class="tag info">疼痛安全跳過</span>'
+    : oc === 'skip' ? `<span class="tag skip">已跳過（${esc(skipReasonText(e.skipReason))}）</span>`
+    : oc === 'partial' ? '<span class="tag warn">部分完成</span>' : '';
+  const altTag = def.isAlt ? `<span class="tag info">替代動作（原：${esc(base.name)}）</span>` : '';
+  let h = `<div class="ex-card ${statusCls}" id="card${idx}">
+    <div class="ex-head" data-act="toggleCard" data-i="${idx}"><div class="ex-num">${pad(idx + 1)}</div>
+      <div class="grow"><div class="ex-name">${esc(def.name)}</div>
+        <div class="row wrap small" style="gap:4px;margin-top:2px">${statusTag}${altTag}<span class="muted">${isLightDone(e) ? '已用 3 分鐘腿部訓練替代' : def.light ? '做 1 次、3 分鐘' : `${ds}/${targetSets} ${base.type === 'hiit' ? '輪' : '組'}`}</span></div></div>
+      <div class="muted">${open ? '▲' : '▼'}</div></div>`;
+  if (!open) return h + '</div>';
+
+  if (base.alternatives.length && e.status !== 'skipped') {
+    h += `<div class="variant-pick"><span class="lbl">要做哪個動作？（可以隨時換回來）</span>
+      <button class="vbtn ${def.isAlt ? '' : 'on'}" data-act="pickVariant" data-i="${idx}" data-v="">原動作：${esc(base.name)}</button>
+      ${base.alternatives.map((a, k) => `<button class="vbtn ${e.altIndex === k ? 'on' : ''}" data-act="pickVariant" data-i="${idx}" data-v="${k}">🔁 替代：${esc(a.name)}</button>`).join('')}</div>`;
+  }
+  h += exMetaHTML(def);
+  if (def.inheritNote) h += `<p class="tiny muted">${esc(def.inheritNote)}</p>`;
+  if (e.reduced) {
+    const baseCount = e.sets.filter(x => !x.extra).length;
+    h += `<div class="alert mid">📉 本次目標 ${targetSets} 組（課表原本 ${baseCount} 組）。上次隔天檢查變更糟，這次少做 ${e.reduced.count} 組；只影響這次紀錄，課表不變。</div>`;
+  }
+  const ik = 'sess_' + idx;
+  h += `<button class="toggle-link" data-act="toggleInfo" data-k="${ik}">${ui.info[ik] ? '▲ 收合說明' : '▼ 動作說明、注意事項、替代動作'}</button>`;
+  if (ui.info[ik]) h += exerciseInfoHTML(def);
+  h += lastRecordHTML(def, s.id);
+
+  // 開始前回報的部位疼痛 → 這個動作建議停止
+  const stopR = painStopReasons(s.precheck, base);
+  if (stopR.length && oc !== 'safe' && oc !== 'full') {
+    h += `<div class="alert stop">⚠ 開始前回報：${stopR.map(esc).join('、')}。請停止這個動作，${base.alternative ? '改做原始課表的替代動作或跳過。' : '原始課表沒有替代動作，請跳過。'}不要為了 EXP 或成就忍痛。
+      ${base.alternative ? `<div class="small" style="margin-top:4px">替代：${esc(base.alternative)}</div>` : ''}
+      <div class="btn-row mt">${base.alternatives.length && !def.isAlt ? `<button class="btn sm" data-act="painSwap" data-i="${idx}">🔁 換成替代動作</button>` : ''}
+        <button class="btn sm orange" data-act="painSkip" data-i="${idx}">⏭ 跳過（疼痛安全跳過）</button></div></div>`;
+  }
+  // 疼痛回報紀錄
+  if (e.painReports && e.painReports.length) {
+    const lp = e.painReports[e.painReports.length - 1];
+    if (lp.score !== null && lp.score !== undefined) h += `<div class="alert ${lp.score >= 4 || lp.numb ? 'stop' : 'mid'}">疼痛回報：${lp.score} 分${lp.numb ? '、手麻加劇' : ''}${lp.score >= 4 || lp.numb ? '（請停止這個動作）' : ''}</div>`;
+  }
+
+  if (e.status === 'skipped') {
+    h += `<div class="card-actions"><button class="btn sm ghost" data-act="unskip" data-i="${idx}">↺ 取消跳過</button></div></div>`;
+    return h;
+  }
+
+  // 每組
+  const cur = currentSetIndex(e, idx);
+  const lightMode = def.light || isLightDone(e);   // 3 分鐘腿部訓練：只顯示一筆，不列出其他輪
+  if (lightMode) h += `<p class="tiny muted">3 分鐘腿部訓練是 HIIT 的輕鬆版替代：做 1 次、完整 3 分鐘就算完成，不和 HIIT 重複計算。</p>`;
+  e.sets.forEach((x, i) => {
+    const rowDef = x.done ? variantDef(base, x.alt) : def;   // 已完成的組依當時實際做的動作顯示
+    const lbl = rowDef.light ? '3 分鐘腿部訓練' : base.type === 'hiit' ? `第 ${i + 1} 輪` : `第 ${i + 1} 組`;
+    if (x.dropped) { h += `<div class="set-row" style="opacity:.55;cursor:default"><span class="sl">${lbl}</span><span class="sv">本次減量，不用做</span></div>`; return; }
+    if (lightMode && !x.done && i !== cur) return;
+    if (i === cur) h += setEditorHTML(def, e, idx, x, i, lbl);
+    else h += `<div class="set-row ${x.done ? 'done' : ''}" data-act="focusSet" data-i="${idx}" data-s="${i}">
+      <span class="sl">${x.done ? '✓ ' : ''}${lbl}${x.extra ? '<span class="tiny muted">（額外）</span>' : ''}</span>
+      <span class="sv">${x.done ? ((x.alt ?? null) !== (e.altIndex ?? null) ? `<span class="cyan">${esc(variantName(base, x.alt))}</span> ` : '') + (esc(setSummaryText(x, rowDef)) || '已完成') : '待完成'}</span><span class="small cyan">${x.done ? '修改' : '輸入'}</span></div>`;
+  });
+
+  h += `<div class="card-actions">
+    <button class="btn sm orange" data-act="painReport" data-i="${idx}">😣 回報疼痛</button>
+    <button class="btn sm ghost" data-act="skipEx" data-i="${idx}">⏭ 跳過</button>
+    ${ds >= targetSets && base.type !== 'hiit' ? `<button class="btn sm ghost" data-act="addSet" data-i="${idx}">＋ 額外一組</button>` : ''}
+    ${s.worseNote && base.type !== 'hiit' ? (e.reduced
+      ? `<button class="btn sm ghost" data-act="restoreSet" data-i="${idx}">↺ 恢復原本組數</button>`
+      : canReduce(e) ? `<button class="btn sm yellow" data-act="reduceSet" data-i="${idx}">－ 這次少做一組</button>` : '') : ''}
+  </div>
+  ${ds >= targetSets && base.type !== 'hiit' ? '<p class="tiny muted">額外組數只做紀錄，不另外給 EXP；是否加量請依課表進步原則判斷。</p>' : ''}</div>`;
+  return h;
+}
+
+/** 可以減一組：還沒減過、減完至少剩 1 組、還有沒做的規定組（不動已完成或跳過的紀錄） */
+function canReduce(e) {
+  if (e.reduced || e.status === 'skipped') return false;
+  const target = e.sets.filter(isTargetSet);
+  return target.length > 1 && target.some(x => !x.done);
+}
+
+function setEditorHTML(def, e, idx, x, i, lbl) {
+  const f = (field) => `data-field="${field}" data-i="${idx}" data-s="${i}"`;
+  const last = lastRecord(def.moveKey, training.active.id);
+  const lastSet = last && last.sets[i];
+  let h = `<div class="set-edit"><div class="sl"><span>▶ ${lbl}${x.extra ? '（額外）' : ''}</span>
+    <span class="small muted">${def.type === 'hiit' ? `${def.hiitMoves.length} 動作 × 做 ${def.duration} 秒／休 ${def.restSeconds} 秒` : def.light ? `目標：做 1 次、完整 ${def.duration / 60} 分鐘（${def.duration} 秒）` : def.type === 'time' ? `目標 ${def.duration} 秒${def.perSide ? '（每邊）' : ''}` : `目標 ${def.repMin}${def.repMax !== def.repMin ? '–' + def.repMax : ''} 下${def.perSide ? '（每邊）' : ''}${def.inherited ? '（沿用原動作）' : ''}`}</span></div>`;
+  if (def.type === 'hiit') {
+    h += `<p class="small">${def.hiitMoves.map(esc).join(' → ')}</p>
+      <button class="btn block ghost" data-act="startHiit" data-i="${idx}">⏱ 開始間歇計時：剩下 ${e.sets.filter(y => !y.done).length} 輪連續跑（做 ${def.duration} 秒／休 ${def.restSeconds} 秒）</button>
+      <p class="tiny muted">每跑完一輪（含最後 ${def.restSeconds} 秒休息）會自動打勾，可以再修改。</p>
+      <label class="f mt">備註<input type="text" ${f('note')} value="${esc(x.note)}" placeholder="例：第 3 個動作放慢"></label>`;
+  } else {
+    h += `<div class="fgrid">`;
+    if (def.perSide) {
+      const [kl, kr] = sideKeys(def), unit = def.type === 'time' ? '秒數' : '次數';
+      const ph = k => lastSet && num(lastSet[k]) !== null ? '上次 ' + esc(lastSet[k]) : lastSet && num(lastSet[sideKeys(def)[2]]) !== null ? '上次 ' + esc(lastSet[sideKeys(def)[2]]) : (def.type === 'time' ? def.duration : def.repMin + '–' + def.repMax);
+      h += `<label class="f">左側實際${unit}<input class="big-num" type="number" inputmode="numeric" min="0" ${f(kl)} value="${esc(x[kl] ?? '')}" placeholder="${ph(kl)}"></label>
+        <label class="f">右側實際${unit}<input class="big-num" type="number" inputmode="numeric" min="0" ${f(kr)} value="${esc(x[kr] ?? '')}" placeholder="${ph(kr)}"></label>
+        <div class="full btn-row"><button class="btn sm ghost" data-act="sameSides" data-i="${idx}" data-s="${i}">＝ 左右次數相同（用已填的一邊）</button>
+          ${def.type === 'time' ? `<button class="btn sm ghost" data-act="startWork" data-i="${idx}" data-s="${i}">⏱ 計時 ${def.duration} 秒（單邊）</button>` : ''}</div>`;
+      if (def.type !== 'time') h += `<label class="f full">RIR（還能做幾下）<select ${f('rir')}>${['', '0', '1', '2', '3', '4', '5+'].map(v => `<option value="${v}" ${String(x.rir) === v ? 'selected' : ''}>${v === '' ? '—' : v}</option>`).join('')}</select></label>`;
+    } else if (def.type === 'time') {
+      h += `<label class="f">實際秒數${def.perSide ? '（每邊）' : ''}<input class="big-num" type="number" inputmode="numeric" min="0" ${f('seconds')} value="${esc(x.seconds)}" placeholder="${lastSet ? esc(lastSet.seconds) : def.duration}"></label>
+        <div class="f" style="justify-content:flex-end"><button class="btn ghost" data-act="startWork" data-i="${idx}" data-s="${i}">⏱ 計時 ${def.duration} 秒</button></div>`;
+    } else {
+      h += `<label class="f">實際次數${def.perSide ? '（每邊）' : ''}<input class="big-num" type="number" inputmode="numeric" min="0" ${f('reps')} value="${esc(x.reps)}" placeholder="${lastSet && num(lastSet.reps) !== null ? '上次 ' + esc(lastSet.reps) : def.repMin + '–' + def.repMax}"></label>
+        <label class="f">RIR（還能做幾下）<select ${f('rir')}>${['', '0', '1', '2', '3', '4', '5+'].map(v => `<option value="${v}" ${String(x.rir) === v ? 'selected' : ''}>${v === '' ? '—' : v}</option>`).join('')}</select></label>`;
+    }
+    const eq = def.equipment || '';
+    const quick = [];
+    if (eq.includes('水瓶')) quick.push(`<button class="btn sm ghost" data-act="quickFill" data-k="bottle" data-i="${idx}" data-s="${i}">🍶 ${GEAR.bottleLabel}</button>`);
+    if (eq.includes('阻力帶')) quick.push(`<button class="btn sm ghost" data-act="quickFill" data-k="band" data-i="${idx}" data-s="${i}">🎗 ${GEAR.bandLabel}</button>`);
+    if (quick.length) h += `<div class="full btn-row">${quick.join('')}</div>`;
+    h += `<label class="f">重量 kg（可空白）<input type="number" inputmode="decimal" step="0.1" min="0" ${f('weight')} value="${esc(x.weight)}" placeholder="徒手留空"></label>
+      <label class="f">阻力帶／阻力<input type="text" ${f('band')} value="${esc(x.band)}" placeholder="${lastSet && lastSet.band ? esc(lastSet.band) : '例：' + GEAR.bandLabel}"></label>`;
+    if (def.type === 'time') h += `<label class="f full">RIR（可空白）<select ${f('rir')}>${['', '0', '1', '2', '3', '4', '5+'].map(v => `<option value="${v}" ${String(x.rir) === v ? 'selected' : ''}>${v === '' ? '—' : v}</option>`).join('')}</select></label>`;
+    h += `<label class="f full">備註<input type="text" ${f('note')} value="${esc(x.note)}" placeholder="例：右肩有點緊"></label></div>`;
+  }
+  h += `<div class="btn-row mt">
+    ${x.done ? `<button class="btn ghost" data-act="undoSet" data-i="${idx}" data-s="${i}">↺ 改回未完成</button>` : ''}
+    ${x.extra && !x.done ? `<button class="btn ghost" data-act="removeSet" data-i="${idx}" data-s="${i}">刪除這組</button>` : ''}
+    <button class="btn big green" style="flex:2" data-act="completeSet" data-i="${idx}" data-s="${i}">${x.done ? '✓ 儲存修改' : def.type === 'hiit' ? '✓ 完成本輪' : '✓ 完成本組'}</button></div></div>`;
+  return h;
+}
+
+/* ---------- 紀錄 ---------- */
+function viewHistory() {
+  const list = completedSessions().slice().reverse();
+  if (!list.length) return `<div class="box"><p>還沒有訓練紀錄。完成第一次訓練後就會出現在這裡。</p></div>`;
+  let h = `<p class="small muted" style="margin:0 4px">共 ${list.length} 筆紀錄。點一下可以查看、修改或刪除。</p>`;
+  let curMonth = '';
+  list.forEach(s => {
+    const m = s.date.slice(0, 7);
+    if (m !== curMonth) { curMonth = m; h += `<h3 class="px yellow" style="font-size:11px;margin:14px 4px 8px">${m.replace('-', ' / ')}</h3>`; }
+    const sm = summarize(s);
+    const rw = game.awarded[s.id];
+    h += `<div class="hist-item" data-act="histDetail" data-id="${s.id}">
+      <div class="row between"><b>${fmtDate(s.date)}｜${esc(DAY[s.dayId].short)}</b><span class="tag ${sm.full ? 'ok' : 'warn'}">${sm.full ? '完整' : '部分'}</span></div>
+      <div class="small muted">${esc(DAY[s.dayId].title)} · 完整 ${sm.outcomes.full}／部分 ${sm.outcomes.partial}／疼痛跳過 ${sm.outcomes.safe} · ${sm.setCount} 組 · ${fmtMin(sm.durationMs)}${sm.volume ? ` · ${fmtNum(sm.volume)} kg` : ''}${rw ? ` · +${rw.exp} EXP` : ''}</div></div>`;
+  });
+  return h;
+}
+
+/** 動作結果統計方塊（結算、紀錄明細共用） */
+function outcomeTilesHTML(sm) {
+  const o = sm.outcomes;
+  return `<div class="alert ${sm.full ? 'ok' : 'mid'}">${sm.full ? '✓ 完整完成課表' : '部分完成：有動作沒做完規定組數或因其他原因跳過'}</div>
+    <div class="stat-tiles mt">
+      <div class="tile"><div class="k">完整完成動作</div><div class="v">${o.full}</div></div>
+      <div class="tile"><div class="k">部分完成動作</div><div class="v">${o.partial}</div></div>
+      <div class="tile"><div class="k">疼痛安全跳過</div><div class="v">${o.safe}</div></div>
+      <div class="tile"><div class="k">其他跳過／未做</div><div class="v">${o.skip}／${o.none}</div></div>
+      <div class="tile"><div class="k">實際完成組數</div><div class="v">${sm.setCount}</div></div>
+      <div class="tile"><div class="k">訓練時間</div><div class="v">${fmtMin(sm.durationMs)}</div></div></div>`;
+}
+function sessionDetailHTML(s) {
+  const sm = summarize(s);
+  let h = `<p><b>${fmtDate(s.date)}｜${esc(DAY[s.dayId].title)}</b></p>
+    ${outcomeTilesHTML(sm)}
+    <p class="small mt">訓練量：${sm.volume ? fmtNum(sm.volume) + ' kg' : '—'}</p>
+    <p class="tiny muted">訓練量只計算有填重量的組數（${sm.weightedSets} 組）；阻力帶與徒手組數不換算。</p>`;
+  if (s.precheck) h += `<p class="small">開始前：肩 ${s.precheck.shoulder}／下背 ${s.precheck.back}／手腕 ${s.precheck.wrist}；手麻：${{ none: '沒有', same: '和平常一樣', worse: '比平常明顯' }[s.precheck.numb]}</p>`;
+  if (s.nextDay) h += `<p class="small">隔天檢查：${s.nextDay.result === 'ok' ? '✓ 回到原本狀態' : '✗ 變更糟（下次少一組）'}</p>`;
+  return h + sessionTableHTML(s);
+}
+function sessionTableHTML(s) {
+  let h = `<div class="scroll-x mt"><table class="t"><tr><th>動作</th><th>紀錄</th></tr>`;
+  s.exercises.forEach(e => {
+    const def = EX[e.exerciseId];
+    const ds = doneSets(e);
+    const oc = exerciseOutcome(e);
+    let rec = e.status === 'skipped' ? `<span class="muted">跳過${e.skipReason === 'pain' ? '（疼痛／不適）' : e.skipReason ? '（' + esc(skipReasonText(e.skipReason)) + '）' : ''}</span>`
+      : ds.length ? ds.map((x, i) => `${i + 1}. ${(x.alt ?? null) !== null ? `<span class="cyan">[替代：${esc(variantName(def, x.alt))}]</span> ` : ''}${esc(setSummaryText(x, variantDef(def, x.alt))) || '完成'}`).join('<br>') : '<span class="dim">未完成</span>';
+    if (e.reduced) rec += `<br><span class="yellow">本次減量 ${e.reduced.count} 組（隔天檢查變更糟），目標 ${e.sets.filter(isTargetSet).length} 組</span>`;
+    if (e.painReports && e.painReports.length) rec += `<br><span class="red">疼痛回報：${e.painReports.map(p => p.score === null || p.score === undefined ? '開始前回報' : p.score + '分' + (p.numb ? '＋手麻' : '')).join('、')}</span>`;
+    h += `<tr><td>${esc(def.name)}<br><span class="tag ${oc === 'full' ? 'ok' : oc === 'safe' ? 'info' : oc === 'partial' ? 'warn' : 'skip'}">${OUTCOME_LABEL[oc]}</span></td><td>${rec}</td></tr>`;
+  });
+  h += `</table></div>`;
+  return h;
+}
+function skipReasonText(r) { return { pain: '疼痛／不適', equip: '器材問題', time: '時間不夠', other: '其他' }[r] || r; }
+
+/* ---------- 統計 ---------- */
+function barChartSVG(data, { color = '#41a6f6', target = null, unit = '', h = 170 } = {}) {
+  const W = 340, padL = 34, padB = 26, padT = 14, H = h;
+  const max = Math.max(target || 0, ...data.map(d => d.value), 1);
+  const bw = (W - padL - 6) / data.length;
+  const y = v => H - padB - (v / max) * (H - padB - padT);
+  let g = '';
+  [0, 0.5, 1].forEach(t => { const v = max * t; g += `<line x1="${padL}" x2="${W - 4}" y1="${y(v)}" y2="${y(v)}" stroke="#333c57"/><text x="${padL - 4}" y="${y(v) + 3}" fill="#94b0c2" font-size="9" text-anchor="end">${fmtNum(v)}</text>`; });
+  data.forEach((d, i) => {
+    const x = padL + i * bw + 2, top = y(d.value);
+    g += `<rect x="${x}" y="${top}" width="${Math.max(2, bw - 4)}" height="${H - padB - top}" fill="${d.color || color}"/>`;
+    if (d.value2) { const t2 = y(d.value2), w2 = Math.max(2, (bw - 4) / 2); g += `<rect x="${x + (bw - 4) / 4}" y="${t2}" width="${w2}" height="${H - padB - t2}" fill="#a7f070" stroke="#0d0e17" stroke-width="1"/>`; }
+    if (d.value) g += `<text x="${x + (bw - 4) / 2}" y="${top - 3}" fill="#f4f4f4" font-size="9" text-anchor="middle">${fmtNum(d.value)}</text>`;
+    if (data.length <= 8 || i % 2 === 0) g += `<text x="${x + (bw - 4) / 2}" y="${H - 10}" fill="#94b0c2" font-size="9" text-anchor="middle">${esc(d.label)}</text>`;
+  });
+  if (target) g += `<line x1="${padL}" x2="${W - 4}" y1="${y(target)}" y2="${y(target)}" stroke="#ffcd75" stroke-dasharray="4 3"/><text x="${W - 6}" y="${y(target) - 3}" fill="#ffcd75" font-size="9" text-anchor="end">目標 ${target}${unit}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges">${g}</svg>`;
+}
+function lineChartSVG(points, { color = '#a7f070', h = 170, unit = '' } = {}) {
+  const W = 340, padL = 34, padB = 26, padT = 16, H = h;
+  if (!points.length) return '<p class="muted small">還沒有資料。</p>';
+  const vals = points.map(p => p.value);
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const lo = Math.max(0, min - 1), hi = max + 1;
+  const x = i => points.length === 1 ? (padL + W) / 2 : padL + 6 + i * ((W - padL - 16) / (points.length - 1));
+  const y = v => H - padB - ((v - lo) / (hi - lo)) * (H - padB - padT);
+  let g = '';
+  [lo, (lo + hi) / 2, hi].forEach(v => { g += `<line x1="${padL}" x2="${W - 4}" y1="${y(v)}" y2="${y(v)}" stroke="#333c57"/><text x="${padL - 4}" y="${y(v) + 3}" fill="#94b0c2" font-size="9" text-anchor="end">${fmtNum(v)}</text>`; });
+  g += `<polyline fill="none" stroke="${color}" stroke-width="2" points="${points.map((p, i) => `${x(i)},${y(p.value)}`).join(' ')}"/>`;
+  points.forEach((p, i) => {
+    g += `<rect x="${x(i) - 3}" y="${y(p.value) - 3}" width="6" height="6" fill="${color}"/>`;
+    g += `<text x="${x(i)}" y="${y(p.value) - 7}" fill="#f4f4f4" font-size="9" text-anchor="middle">${fmtNum(p.value)}${unit}</text>`;
+    if (points.length <= 8 || i % Math.ceil(points.length / 8) === 0) g += `<text x="${x(i)}" y="${H - 10}" fill="#94b0c2" font-size="9" text-anchor="middle">${esc(p.label)}</text>`;
+  });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges">${g}</svg>`;
+}
+
+const CATEGORY_LABEL = { chest: '胸', back: '背', legs: '腿', shoulders: '肩', arms: '手臂', core: '核心' };
+const CATEGORY_COLOR = { chest: '#b13e53', back: '#3b5dc9', legs: '#38b764', shoulders: '#ef7d57', arms: '#ffcd75', core: '#73eff7' };
+
+function viewStats() {
+  const sessions = completedSessions().filter(sessionCounts);
+  if (!sessions.length) return `<div class="box"><p>完成訓練後，這裡會出現每週次數、訓練量、肌群與動作進步圖表。</p></div>`;
+  const ctx = buildContext();
+  let totalSets = 0, totalVol = 0;
+  sessions.forEach(s => { const sm = summarize(s); totalSets += sm.setCount; totalVol += sm.volume; });
+
+  // 最近 12 週
+  const thisWk = weekKey(ymd());
+  const weeks = []; for (let i = 11; i >= 0; i--) weeks.push(addDays(thisWk, -7 * i));
+  const wkLabel = w => { const d = parseYmd(w); return `${d.getMonth() + 1}/${d.getDate()}`; };
+  const weeklyCount = weeks.map(w => ({ label: wkLabel(w), value: formalDaysDoneInWeek(w).size, value2: formalDaysFullInWeek(w).size }));
+  const weeklyVol = weeks.map(w => ({ label: wkLabel(w), value: Math.round(sessionsInWeek(w).reduce((a, s) => a + summarize(s).volume, 0) * 10) / 10 }));
+
+  // 肌群組數
+  const since = ui.statsRange === '4w' ? addDays(thisWk, -21) : '0000-00-00';
+  const cat = { chest: 0, back: 0, legs: 0, shoulders: 0, arms: 0, core: 0 };
+  sessions.filter(s => s.date >= since).forEach(s => s.exercises.forEach(e => {
+    // 依每一組實際做的動作分類（替代動作算在它自己的肌群），每組只算一次
+    groupSetsByVariant(e).forEach(({ v, sets }) => { if (cat[v.category] !== undefined) cat[v.category] += sets.length; });
+  }));
+
+  // 動作進步
+  const moves = [];
+  const seen = new Set();
+  FORMAL_DAYS.forEach(d => d.exercises.forEach(def => {
+    if (def.type === 'hiit') return;
+    [def, ...def.alternatives.map((a, k) => variantDef(def, k))].forEach(v => {
+      if (seen.has(v.moveKey)) return;
+      seen.add(v.moveKey); moves.push(v);
+    });
+  }));
+  if (!ui.statsMove) { const withData = moves.find(m => moveHistory(m.moveKey).length); ui.statsMove = (withData || moves[0]).moveKey; }
+  const mdef = moves.find(m => m.moveKey === ui.statsMove) || moves[0];
+  const mh = moveHistory(mdef.moveKey);
+  const ptsBest = mh.map(r => ({ label: `${parseYmd(r.session.date).getMonth() + 1}/${parseYmd(r.session.date).getDate()}`, value: bestOf(r.sets, mdef.type).best })).filter(p => p.value !== null);
+  const ptsW = mh.map(r => ({ label: `${parseYmd(r.session.date).getMonth() + 1}/${parseYmd(r.session.date).getDate()}`, value: bestOf(r.sets, mdef.type).maxW })).filter(p => p.value !== null);
+
+  let h = `<div class="box"><div class="box-title">總覽</div><div class="stat-tiles">
+      <div class="tile"><div class="k">正式訓練（有參與）</div><div class="v">${ctx.formal} 次</div></div>
+      <div class="tile"><div class="k">完整完成課表</div><div class="v">${ctx.formalFull} 次</div></div>
+      <div class="tile"><div class="k">完成組數</div><div class="v">${totalSets}</div></div>
+      <div class="tile"><div class="k">訓練量（有填重量）</div><div class="v">${fmtNum(totalVol)} kg</div></div>
+      <div class="tile"><div class="k">4 練都完整的週數</div><div class="v">${ctx.goalWeeks}</div></div>
+      <div class="tile"><div class="k">進步紀錄</div><div class="v">${ctx.prCount}</div></div></div></div>
+
+    <div class="box"><div class="box-title">每週訓練次數</div>${barChartSVG(weeklyCount, { color: '#38b764', target: 4, unit: ' 次' })}
+      <p class="tiny muted"><span style="color:#38b764">■</span> 有參與訓練　<span style="color:#a7f070">■</span> 完整完成課表。最近 12 週，只算正式訓練日（同一週同一天重複練只算 1 次）。</p></div>
+
+    <div class="box"><div class="box-title">每週訓練量 kg</div>${barChartSVG(weeklyVol, { color: '#41a6f6' })}
+      <p class="tiny muted">只計算有填重量的組數（重量 × 次數）。阻力帶、徒手動作沒有重量，不會被換算或混在一起比較。</p></div>
+
+    <div class="box"><div class="box-title">各肌群完成組數</div>
+      <div class="seg"><button class="${ui.statsRange === 'all' ? 'on' : ''}" data-act="statsRange" data-v="all">全部</button><button class="${ui.statsRange === '4w' ? 'on' : ''}" data-act="statsRange" data-v="4w">最近 4 週</button></div>
+      ${barChartSVG(Object.keys(cat).map(k => ({ label: CATEGORY_LABEL[k], value: cat[k], color: CATEGORY_COLOR[k] })))}
+      <p class="tiny muted">組數是紀錄次數，不是力量指標。替代動作依實際做的動作分類；HIIT 與 3 分鐘腿部訓練不算肌群組數。</p></div>
+
+    <div class="box"><div class="box-title">單一動作的歷史</div>
+      <label class="f">選擇動作<select data-change="statsMove">${moves.map(m => `<option value="${m.moveKey}" ${m.moveKey === mdef.moveKey ? 'selected' : ''}>${esc(m.name)}${moveHistory(m.moveKey).length ? '' : '（無紀錄）'}</option>`).join('')}</select></label>
+      <h3 class="mt">每次最佳${mdef.type === 'time' ? '秒數' : '次數'}</h3>${lineChartSVG(ptsBest, { unit: mdef.type === 'time' ? 's' : '' })}
+      ${ptsW.length ? `<h3 class="mt">最大重量 kg</h3>${lineChartSVG(ptsW, { color: '#ffcd75' })}` : '<p class="tiny muted">這個動作沒有填過重量，所以沒有重量圖表。</p>'}
+      ${mh.length ? `<div class="scroll-x mt"><table class="t"><tr><th>日期</th><th>每組</th><th>重量／阻力</th></tr>${mh.slice().reverse().map(r => `<tr><td>${fmtDate(r.session.date)}</td><td>${r.sets.map(x => mdef.type === 'time' ? (x.seconds ?? '—') + 's' : (x.reps ?? '—')).join(' / ')}</td><td>${esc([...new Set(r.sets.map(x => [num(x.weight) !== null ? x.weight + 'kg' : '', x.band].filter(Boolean).join(' ')).filter(Boolean))].join('、') || '—')}</td></tr>`).join('')}</table></div>` : ''}
+      <p class="tiny muted">只和同一個動作比較。換了阻力帶或器材時，數字不能直接當成力量變化，請搭配阻力欄位一起看。</p></div>`;
+  return h;
+}
+
+/* ---------- 角色 ---------- */
+function viewCharacter() {
+  const lv = levelInfo(game.exp);
+  const st = characterStats();
+  const statNames = [['str', 'STR', '力量'], ['vit', 'VIT', '體能'], ['dex', 'DEX', '敏捷'], ['end', 'END', '耐力']];
+  let h = `<div class="box gold"><div class="box-title">CHARACTER</div>
+    <div class="char-top"><div class="hero-stage" style="min-width:132px;min-height:140px">${heroSVG(8)}</div>
+      <div class="grow"><div class="row"><div class="ex-name grow">${esc(game.name)}</div><button class="btn sm ghost" data-act="renameHero">✎ 改名</button></div>
+        <div class="px yellow" style="font-size:18px;margin:8px 0">LV ${lv.level}</div>${expBar()}
+        <p class="small mt">💰 金幣 <b class="yellow">${game.gold}</b> G　·　累積 EXP ${game.exp}</p></div></div></div>
+
+    <div class="box alt"><div class="box-title">STATUS</div>
+      ${statNames.map(([k, K, zh]) => { const tot = st.base[k] + st.bonus[k]; return `<div class="stat-line"><span class="k">${K}</span><div><div class="small">${zh}${st.bonus[k] ? ` <span class="lime">(+${st.bonus[k]} 裝備)</span>` : ''}</div><div class="bar thin"><i style="width:${Math.min(100, tot)}%"></i></div></div><span class="v">${tot}</span></div>`; }).join('')}
+      <p class="tiny muted">屬性只是遊戲呈現，由累積的訓練紀錄換算，不代表真實身體能力，也不是醫療或體能測量。</p></div>
+
+    <div class="box"><div class="box-title">EQUIPMENT</div><div class="slot-grid">
+      ${SLOTS.map(sl => { const it = ITEM[game.equipped[sl.id]]; return `<button class="slot" data-act="openSlot" data-slot="${sl.id}">
+        <span class="swatch" style="background:${it && it.color ? it.color : '#1a1c2c'}"></span>
+        <span><span class="sn">${sl.name}</span><br><span class="in">${esc(it ? it.name : '—')}</span></span></button>`; }).join('')}</div>
+      <p class="small mt">已解鎖裝備：<b>${unlockedItemIds().length}</b> / ${ITEMS.length}</p>
+      <p class="tiny muted">裝備只影響遊戲數值與外觀，不影響訓練內容。取得方式：升級、成就、擊敗 Boss、商店（金幣）。</p></div>`;
+  return h;
+}
+
+function slotModalHTML(slotId) {
+  const sl = SLOTS.find(s => s.id === slotId);
+  const items = ITEMS.filter(i => i.slot === slotId);
+  return `<div class="item-list">${items.map(it => {
+    const un = isItemUnlocked(it), eq = game.equipped[slotId] === it.id;
+    const statTxt = Object.entries(it.stats).map(([k, v]) => `${k.toUpperCase()}+${v}`).join(' ') || '無加成';
+    let btn = '';
+    if (eq) btn = '<span class="tag ok">裝備中</span>';
+    else if (un) btn = `<button class="btn sm" data-act="equip" data-id="${it.id}">裝備</button>`;
+    else if (it.unlock.type === 'shop') btn = `<button class="btn sm yellow" data-act="buyItem" data-id="${it.id}" ${game.gold < it.unlock.price ? 'disabled' : ''}>${it.unlock.price} G</button>`;
+    else btn = '<span class="tag skip">🔒</span>';
+    return `<div class="item ${eq ? 'eq' : ''} ${un ? '' : 'locked'}"><span class="swatch" style="background:${it.color || '#1a1c2c'}"></span>
+      <div class="grow"><b>${esc(it.name)}</b> <span class="tiny lime">${statTxt}</span><div class="tiny muted">${esc(it.desc)}${un ? '' : '　🔓 ' + esc(unlockText(it))}</div></div>${btn}</div>`;
+  }).join('')}</div><p class="tiny muted mt">${esc(sl.name)}只影響外觀與遊戲數值。</p>`;
+}
+
+/* ---------- 世界地圖 ---------- */
+function worldMapSVG(ctx) {
+  const nodes = [[40, 180], [110, 130], [60, 70], [170, 60], [250, 110], [290, 40]];
+  let curIdx = 0;
+  REGIONS.forEach((r, i) => { if (ctx.level >= r.levelReq) curIdx = i; });
+  let g = `<rect width="340" height="220" fill="#1a1c2c"/>`;
+  // 地形色塊
+  const blobs = [[0, 140, 120, 80], [70, 95, 100, 70], [10, 30, 110, 70], [130, 20, 100, 80], [200, 80, 110, 70], [240, 0, 100, 70]];
+  blobs.forEach((b, i) => { g += `<rect x="${b[0]}" y="${b[1]}" width="${b[2]}" height="${b[3]}" fill="${REGIONS[i].color}" opacity="${ctx.level >= REGIONS[i].levelReq ? .55 : .15}"/>`; });
+  // 路徑
+  g += `<polyline points="${nodes.map(n => n.join(',')).join(' ')}" fill="none" stroke="#f4f4f4" stroke-width="3" stroke-dasharray="6 5"/>`;
+  nodes.forEach((n, i) => {
+    const r = REGIONS[i], open = ctx.level >= r.levelReq, beat = !!game.bosses[r.id];
+    g += `<rect x="${n[0] - 10}" y="${n[1] - 10}" width="20" height="20" fill="${beat ? '#ffcd75' : open ? r.color : '#333c57'}" stroke="#0d0e17" stroke-width="3"/>`;
+    g += `<text x="${n[0]}" y="${n[1] + 24}" fill="${open ? '#f4f4f4' : '#566c86'}" font-size="10" text-anchor="middle" font-weight="700">${open ? r.name : '？？？'}</text>`;
+    if (!open) g += `<text x="${n[0]}" y="${n[1] + 4}" fill="#94b0c2" font-size="10" text-anchor="middle">🔒</text>`;
+    if (beat) g += `<text x="${n[0]}" y="${n[1] + 4}" fill="#0d0e17" font-size="11" text-anchor="middle">★</text>`;
+  });
+  const hn = nodes[curIdx];
+  const heroMini = heroSVG(1).replace('<svg', `<svg x="${hn[0] - 8}" y="${hn[1] - 34}" width="16" height="15"`);
+  g += heroMini;
+  return `<svg viewBox="0 0 340 220" shape-rendering="crispEdges">${g}</svg>`;
+}
+
+function viewMap() {
+  const ctx = buildContext();
+  const totalStages = REGIONS.reduce((a, r) => a + r.stages.length + 1, 0);
+  const cleared = REGIONS.reduce((a, r) => a + r.stages.filter(st => stageCleared(r, st, ctx)).length + (game.bosses[r.id] ? 1 : 0), 0);
+  let h = `<div class="box alt world"><div class="box-title">WORLD MAP</div>${worldMapSVG(ctx)}
+    <div class="row between small mt"><span>冒險進度 <b>${cleared}/${totalStages}</b></span><span>累積正式訓練 <b>${ctx.formal}</b> 次</span></div>
+    <div class="bar gold mt"><i style="width:${(cleared / totalStages) * 100}%"></i></div>
+    <button class="btn block ghost mt" data-act="openDex">📕 怪物圖鑑</button>
+    <p class="tiny muted mt">關卡依「累積正式訓練次數」自動通關，區域依「等級」解鎖。Boss 只看累積成果，不需要額外訓練；身體不舒服或疲勞時不用挑戰，Boss 會一直等你。</p></div>`;
+
+  REGIONS.forEach(r => {
+    const open = ctx.level >= r.levelReq;
+    const beat = game.bosses[r.id];
+    const ready = bossReady(r, ctx);
+    h += `<div class="box region ${open ? '' : 'locked'}" style="border-color:${open ? r.color : ''}"><div class="box-title" style="color:${r.color}">${esc(r.name)}</div>
+      <div class="row between small"><span>${open ? '🔓 已解鎖' : `🔒 Lv ${r.levelReq} 解鎖`}</span><span>${beat ? '<span class="yellow">★ 已制霸</span>' : ''}</span></div>
+      <div class="stage-list">${r.stages.map((st, i) => {
+        const c = stageCleared(r, st, ctx);
+        return `<div class="stage ${c ? 'clear' : ''}">${monsterSVG(st.m, 3, c ? '' : 'silh')}<b>${c ? esc(MONSTERS[st.m].name) : `關卡 ${i + 1}`}</b><span class="tiny muted">${c ? '✓ 已擊退' : `累積 ${st.req} 次訓練`}</span></div>`;
+      }).join('')}
+        <div class="stage boss ${beat ? 'clear' : ''}">${monsterSVG(r.boss.m, 3, beat || ready ? '' : 'silh')}
+          <div class="grow"><b>BOSS · ${beat || ready ? esc(MONSTERS[r.boss.m].name) : '？？？'}</b>
+            <div class="tiny muted">條件：累積 ${r.boss.req} 次正式訓練、Lv ${r.boss.levelReq}、本區關卡全部通過</div>
+            ${beat ? `<div class="tiny yellow">★ ${new Date(beat).toLocaleDateString('zh-TW')} 擊敗</div>`
+              : ready ? `<button class="btn sm red mt" data-act="challengeBoss" data-id="${r.id}">⚔ 挑戰 Boss</button>`
+              : `<div class="tiny">進度 ${Math.min(ctx.formal, r.boss.req)}/${r.boss.req}</div>`}</div></div>
+      </div></div>`;
+  });
+  return h;
+}
+
+function dexHTML() {
+  const ctx = buildContext();
+  const entries = [];
+  REGIONS.forEach(r => {
+    r.stages.forEach(st => entries.push({ id: st.m, seen: stageCleared(r, st, ctx), region: r.name }));
+    entries.push({ id: r.boss.m, seen: !!game.bosses[r.id], region: r.name, boss: true });
+  });
+  return `<p class="small">已記錄 ${entries.filter(e => e.seen).length} / ${entries.length}</p>
+    <div class="dex-grid">${entries.map(e => `<div class="dex-cell">${monsterSVG(e.id, 3, e.seen ? '' : 'silh')}
+      <b class="small">${e.seen ? esc(MONSTERS[e.id].name) : '？？？'}</b><span class="tiny muted">${esc(e.region)}${e.boss ? ' · BOSS' : ''}</span>
+      ${e.seen ? `<span class="tiny">${esc(MONSTERS[e.id].desc)}</span>` : ''}</div>`).join('')}</div>`;
+}
+
+/* ---------- 成就 ---------- */
+function viewAchievements() {
+  const ctx = buildContext();
+  const got = ACHIEVEMENTS.filter(a => game.achievements[a.id]).length;
+  let h = `<div class="box gold"><div class="box-title">ACHIEVEMENTS</div>
+    <div class="row between"><b>已解鎖</b><span class="px yellow">${got}/${ACHIEVEMENTS.length}</span></div>
+    <div class="bar gold mt"><i style="width:${(got / ACHIEVEMENTS.length) * 100}%"></i></div>
+    <p class="tiny muted mt">成就重視長期累積，不要求連續打卡；休息不會受到任何懲罰。</p></div>`;
+  ACHIEVEMENTS.forEach(a => {
+    const on = game.achievements[a.id];
+    const [cur, goal] = a.prog(ctx);
+    h += `<div class="ach ${on ? 'on' : ''}"><div class="ic">${a.icon}</div>
+      <div class="grow"><div class="row between"><b>${esc(a.name)}</b><span class="tiny yellow">+${a.gold} G</span></div>
+        <div class="small muted">${esc(a.desc)}</div>
+        ${on ? `<div class="tiny lime">✓ ${new Date(on).toLocaleDateString('zh-TW')} 解鎖</div>`
+          : `<div class="bar thin mt"><i style="width:${Math.min(100, (cur / goal) * 100)}%"></i></div><div class="tiny muted">${Math.min(cur, goal)} / ${goal}</div>`}</div></div>`;
+  });
+  return h;
+}
+
+/* ---------- 疼痛部位與相關動作 ----------
+   依原始課表的 ⚠ 標記對應部位：⚠ 肩 → 肩膀、⚠ 腰 → 下背、⚠ 手腕 → 手腕與手麻。 */
+const PAIN_AREAS = { shoulder: { label: '肩膀', match: '肩' }, back: { label: '下背', match: '腰' }, wrist: { label: '手腕', match: '手腕' } };
+function exerciseAreas(def) { const w = def.warning || ''; return Object.keys(PAIN_AREAS).filter(k => w.includes(PAIN_AREAS[k].match)); }
+/** 依開始前的狀況，回傳這個動作需要停止的原因（空陣列＝不受影響） */
+function painStopReasons(pre, def) {
+  if (!pre) return [];
+  const areas = exerciseAreas(def), out = [];
+  areas.forEach(k => { if (num(pre[k]) >= 4) out.push(`${PAIN_AREAS[k].label} ${pre[k]} 分`); });
+  if (pre.numb === 'worse' && areas.includes('wrist')) out.push('手麻變明顯');
+  return out;
+}
+/** 1–3 分：只需要留意的動作 */
+function painWatchReasons(pre, def) {
+  if (!pre) return [];
+  return exerciseAreas(def).filter(k => num(pre[k]) > 0 && num(pre[k]) < 4).map(k => `${PAIN_AREAS[k].label} ${pre[k]} 分`);
+}
+
+/* ---------- 開始前身體狀況確認 ---------- */
+function precheckHTML() {
+  const p = ui.pre, d = DAY[p.dayId];
+  const check = pendingNextDayCheck();
+  const worse = worseReminder();
+  const slider = (k, label) => `<label class="f mt">${label}：<span class="pain-val" id="pv_${k}">${p[k]}</span>
+    <input type="range" min="0" max="10" step="1" value="${p[k]}" data-pre="${k}"><div class="pain-scale"><span>0 不痛</span><span>3</span><span>10 最痛</span></div></label>`;
+  return `<p><b>${esc(d.label)}｜${esc(d.title)}</b></p>
+    <p class="small muted">開始前花 10 秒確認一下身體狀況（自我感受，不是醫療診斷）。</p>
+    ${check ? `<div class="alert mid">上次訓練（${fmtDate(check.date)}）的隔天檢查還沒做：肩膀、下背在 24 小時內回到原本狀態了嗎？
+      <div class="btn-row mt"><button class="btn sm green" data-act="nextDayCheck" data-id="${check.id}" data-r="ok" data-from="pre">✓ 回到原本</button><button class="btn sm orange" data-act="nextDayCheck" data-id="${check.id}" data-r="worse" data-from="pre">✗ 變更糟</button></div></div>` : ''}
+    ${!check && worse ? '<div class="alert mid">上次隔天檢查「變更糟」：依課表守則，這次少做一組。開始後可以在動作卡片上選擇要少做的動作（只影響這次紀錄）。</div>' : ''}
+    ${slider('shoulder', '肩膀疼痛')}${slider('back', '下背疼痛')}${slider('wrist', '手腕疼痛')}
+    <label class="f mt">手麻（大拇指、食指）<select data-pre="numb">
+      <option value="none" ${p.numb === 'none' ? 'selected' : ''}>沒有</option>
+      <option value="same" ${p.numb === 'same' ? 'selected' : ''}>和平常一樣</option>
+      <option value="worse" ${p.numb === 'worse' ? 'selected' : ''}>比平常明顯</option></select></label>
+    <div id="preAlert">${precheckAlertHTML()}</div>
+    <p class="tiny muted mt">⚠ 標記的動作請先給復健師看過。</p>
+    <div class="btn-row mt"><button class="btn ghost" data-act="closeModal">先不要</button><button class="btn green big" data-act="confirmStart">⚔ 開始訓練</button></div>`;
+}
+function precheckAlertHTML() {
+  const p = ui.pre, d = DAY[p.dayId];
+  const stopList = d.exercises.map(def => ({ def, r: painStopReasons(p, def) })).filter(x => x.r.length);
+  const watchList = d.exercises.map(def => ({ def, r: painWatchReasons(p, def) })).filter(x => x.r.length && !painStopReasons(p, def).length);
+  let h = '';
+  if (stopList.length) {
+    h += `<div class="alert stop">⚠ 以下動作請停止，改做原始課表的替代動作；沒有替代動作就跳過：
+      <ul class="rules">${stopList.map(x => `<li>${esc(x.def.name)}（${x.r.map(esc).join('、')}）${x.def.alternative ? `<br><span class="small">替代：${esc(x.def.alternative)}</span>` : '<br><span class="small">沒有替代動作 → 跳過</span>'}</li>`).join('')}</ul>
+      不受影響的動作可以照常做。今天也可以選擇休息，不會影響任何紀錄。</div>`;
+  } else if (Math.max(p.shoulder, p.back, p.wrist) >= 4 || p.numb === 'worse') {
+    h += `<div class="alert mid">有 4 分以上的疼痛或手麻變明顯，但今天的動作沒有對應部位的 ⚠ 標記。訓練中只要引起疼痛，就用「回報疼痛」停下。</div>`;
+  }
+  if (watchList.length) h += `<div class="alert mid">3 分以下可以繼續，以下動作請特別留意：${watchList.map(x => esc(x.def.name)).join('、')}。升到 4 分以上或手麻變明顯就停下。</div>`;
+  if (!h) h = `<div class="alert ok">狀況良好，記得手腕保持直的、握帶子輕輕握就好。</div>`;
+  return h;
+}
+
+/* ---------- 疼痛回報 ---------- */
+function painHTML() {
+  const p = ui.pain, e = training.active.exercises[p.idx], def = EX[e.exerciseId];
+  return `<p><b>${esc(def.name)}</b></p>
+    <label class="f">疼痛分數：<span class="pain-val" id="painVal">${p.score}</span>
+      <input type="range" min="0" max="10" step="1" value="${p.score}" data-painfield="score"><div class="pain-scale"><span>0 不痛</span><span>3</span><span>10 最痛</span></div></label>
+    <label class="row mt"><input type="checkbox" data-painfield="numb" ${p.numb ? 'checked' : ''}> <span>手麻變明顯／加劇</span></label>
+    <div id="painAlert">${painAlertHTML()}</div>
+    <p class="tiny muted mt">疼痛分數只是自我感受紀錄，不是醫療診斷。持續或加劇的疼痛請詢問醫師或復健師。</p>`;
+}
+function painAlertHTML() {
+  const p = ui.pain, e = training.active.exercises[p.idx], def = EX[e.exerciseId];
+  const stop = p.score >= 4 || p.numb;
+  if (!stop) return `<div class="alert ${p.score > 0 ? 'mid' : 'ok'}">3 分以下可以繼續，注意身體反應；升到 4 分以上或手麻變明顯就停下。</div>
+    <div class="btn-row mt"><button class="btn green" data-act="submitPain" data-mode="continue">記錄並繼續</button></div>`;
+  return `<div class="alert stop">⚠ 請停止這個動作。依課表守則：改做替代動作或跳過。不要為了完成任務或 EXP 忍痛。</div>
+    <div class="info alt"><span class="lbl">原始課表的替代動作</span>${def.alternative ? esc(def.alternative) : '這個動作沒有提供替代動作，可以直接跳過。'}</div>
+    <div class="btn-row mt">${def.alternatives.length ? '<button class="btn" data-act="submitPain" data-mode="swap">🔁 換成替代動作</button>' : ''}
+      <button class="btn orange" data-act="submitPain" data-mode="skip">⏭ 跳過這個動作</button></div>
+    <p class="tiny muted">跳過或改做替代動作都不會扣 EXP，疼痛安全跳過算完整處理。</p>
+    ${(() => { const areas = exerciseAreas(def); if (!areas.length) return '';
+      const others = training.active.exercises.filter((x, k) => k !== p.idx && exerciseOutcome(x) === 'none' && exerciseAreas(EX[x.exerciseId]).some(a => areas.includes(a))).map(x => EX[x.exerciseId].name);
+      return others.length ? `<div class="alert mid">同樣標 ⚠ ${esc(def.warning)} 的其他動作：${others.map(esc).join('、')}。做之前請再確認身體狀況。</div>` : ''; })()}`;
+}
+
+/* ---------- 結算 ---------- */
+function resultHTML(s, reward, lvBefore, lvAfter, newAch, newItems, prs) {
+  const sm = summarize(s);
+  return `${lvAfter > lvBefore ? `<div class="levelup">LEVEL UP!<br>LV ${lvBefore} → LV ${lvAfter}</div>` : ''}
+    <div class="center">${heroSVG(6)}</div>
+    ${outcomeTilesHTML(sm)}
+    <div class="stat-tiles mt">
+      <div class="tile"><div class="k">總訓練量</div><div class="v">${sm.volume ? fmtNum(sm.volume) + ' kg' : '—'}</div></div>
+      <div class="tile"><div class="k">完成動作</div><div class="v">${sm.exCount}/${sm.total}</div></div>
+      <div class="tile"><div class="k">獲得 EXP</div><div class="v">+${reward ? reward.exp : 0}</div></div>
+      <div class="tile"><div class="k">獲得金幣</div><div class="v">+${reward ? reward.gold : 0} G</div></div></div>
+    <p class="tiny muted">訓練量只計算有填重量的組數（${sm.weightedSets} 組）。</p>
+    ${reward && reward.lines.length ? `<div class="info">${reward.lines.map(esc).join('<br>')}</div>` : ''}
+    ${prs.length ? `<div class="info alt"><span class="lbl">📈 和過去紀錄相比進步了</span>${prs.map(p => `${esc(p.name)}：${p.kind} ${fmtNum(p.from)} → ${fmtNum(p.to)}`).join('<br>')}</div>` : ''}
+    ${newAch.length ? `<div class="info warn"><span class="lbl">🏆 解鎖成就</span>${newAch.map(a => `${a.icon} ${esc(a.name)}（+${a.gold} G）`).join('<br>')}</div>` : ''}
+    ${newItems.length ? `<div class="info"><span class="lbl">🎁 新裝備解鎖</span>${newItems.map(i => esc(ITEM[i].name)).join('、')}</div>` : ''}
+    <h3 class="mt">本次紀錄摘要</h3>${sessionTableHTML(s)}
+    <p class="small mt">明天記得做「隔天身體檢查」：肩膀、下背有沒有回到原本狀態。</p>
+    <button class="btn big block green mt" data-act="closeModal">回到冒險</button>`;
+}
+
+/* ---------- 設定與備份 ---------- */
+function settingsHTML() {
+  const bytes = ['training', 'game', 'settings'].reduce((a, k) => a + (localStorage.getItem(KEYS[k]) || '').length, 0);
+  return `<h3>備份</h3>
+    <p class="small muted">資料只存在這個瀏覽器裡（LocalStorage）。換手機、清除瀏覽器資料前，請先匯出備份。</p>
+    <div class="btn-row"><button class="btn" data-act="exportJSON">⬇ 匯出完整 JSON 備份</button>
+      <button class="btn ghost" data-act="importJSON">⬆ 匯入 JSON 備份</button>
+      <button class="btn ghost" data-act="exportCSV">⬇ 匯出 CSV 訓練紀錄</button></div>
+    <p class="tiny muted">訓練紀錄 ${completedSessions().length} 筆 · 使用空間約 ${(bytes / 1024).toFixed(1)} KB</p>
+    <h3 class="mt">偏好</h3>
+    <label class="row"><input type="checkbox" data-setting="sound" ${settings.sound ? 'checked' : ''}> 計時倒數與結束時播放提示音</label>
+    <label class="row mt"><input type="checkbox" data-setting="vibrate" ${settings.vibrate ? 'checked' : ''}> 計時結束時震動（部分手機支援）</label>
+    <h3 class="mt">遊戲進度</h3>
+    <p class="small muted">重置遊戲只會清除等級、金幣、裝備、成就、Boss，<b>不會刪除任何真實訓練紀錄</b>。</p>
+    <div class="btn-row"><button class="btn orange" data-act="resetGame">重置遊戲角色</button>
+      <button class="btn ghost" data-act="rebuildGame">依訓練紀錄重算遊戲進度</button></div>
+    <h3 class="mt red">危險區</h3>
+    <p class="small muted">刪除全部訓練紀錄無法復原，建議先匯出備份。</p>
+    <button class="btn red" data-act="clearHistory">刪除全部訓練紀錄</button>
+    <h3 class="mt">在 iPhone 上使用</h3>
+    <p class="small">用 Safari 開啟這個頁面 → 分享 → 「加入主畫面」，就能像 App 一樣全螢幕開啟。資料存在 Safari 裡，請定期匯出備份。</p>`;
+}
+
+/* ---------- 編輯歷史紀錄 ---------- */
+function editHTML(s) {
+  let h = `<label class="f">日期<input type="date" id="edDate" value="${s.date}"></label>`;
+  s.exercises.forEach((e, ei) => {
+    const baseDef = EX[e.exerciseId];
+    h += `<div class="info"><span class="lbl">${esc(baseDef.name)}${e.status === 'skipped' ? '（已跳過）' : ''}</span>`;
+    e.sets.forEach((x, si) => {
+      const k = `${ei}_${si}`;
+      const def = variantDef(baseDef, x.alt);   // 依這一組實際做的動作決定欄位
+      h += `<div class="row wrap" style="margin:6px 0;gap:6px"><label class="row small" style="min-width:86px"><input type="checkbox" data-ed="${k}_done" ${x.done ? 'checked' : ''} ${x.dropped ? 'disabled' : ''}>${def.light ? '3 分鐘腿部訓練' : baseDef.type === 'hiit' ? '第' + (si + 1) + '輪' : '第' + (si + 1) + '組'}${x.dropped ? '<span class="tiny yellow">（本次減量）</span>' : ''}${def.isAlt ? `<span class="tiny cyan">（${esc(def.name)}）</span>` : ''}</label>
+        ${def.type === 'hiit' ? '' : def.perSide
+          ? (() => { const [kl, kr, kb] = sideKeys(def); const legacy = !hasSides(x, def) ? x[kb] : ''; const u = def.type === 'time' ? '秒' : '次';
+              return `<input style="width:84px" type="number" inputmode="numeric" placeholder="左${u}" data-ed="${k}_${kl}" value="${esc(x[kl] || legacy || '')}">
+                <input style="width:84px" type="number" inputmode="numeric" placeholder="右${u}" data-ed="${k}_${kr}" value="${esc(x[kr] || legacy || '')}">`; })()
+          : def.type === 'time'
+          ? `<input style="width:84px" type="number" inputmode="numeric" placeholder="秒" data-ed="${k}_seconds" value="${esc(x.seconds)}">`
+          : `<input style="width:84px" type="number" inputmode="numeric" placeholder="次" data-ed="${k}_reps" value="${esc(x.reps)}">`}
+        ${def.type === 'hiit' ? '' : `<input style="width:84px" type="number" inputmode="decimal" step="0.1" placeholder="kg" data-ed="${k}_weight" value="${esc(x.weight)}">
+        <input style="flex:1;min-width:100px" type="text" placeholder="阻力帶" data-ed="${k}_band" value="${esc(x.band)}">
+        <input style="width:70px" type="text" placeholder="RIR" data-ed="${k}_rir" value="${esc(x.rir)}">`}
+        <input style="flex:1;min-width:120px" type="text" placeholder="備註" data-ed="${k}_note" value="${esc(x.note)}"></div>`;
+    });
+    h += `</div>`;
+  });
+  h += `<p class="tiny muted">修改紀錄不會改變已發放的遊戲獎勵；需要的話可到設定「依訓練紀錄重算遊戲進度」。</p>
+    <div class="btn-row mt"><button class="btn ghost" data-act="histDetail" data-id="${s.id}">取消</button><button class="btn green" data-act="histSaveEdit" data-id="${s.id}">儲存修改</button></div>`;
+  return h;
+}
+
+/* =====================================================================
+   10. 操作事件
+   ===================================================================== */
+function newSet(extra = false) { return { reps: '', repsL: '', repsR: '', seconds: '', secondsL: '', secondsR: '', weight: '', band: '', rir: '', note: '', done: false, extra, alt: null, completedAt: null }; }
+
+function createSession(dayId, precheck) {
+  const d = DAY[dayId];
+  return {
+    id: uid(), dayId, kind: d.kind, date: ymd(), startedAt: Date.now(), endedAt: null,
+    pausedMs: 0, pausedAt: null, status: 'active', lastTouch: Date.now(),
+    precheck, warmupDone: false, cooldownDone: false,
+    worseNote: !!worseReminder(),
+    exercises: d.exercises.map(def => ({
+      exerciseId: def.id, status: 'pending', skipReason: null, altIndex: null,
+      sets: Array.from({ length: def.sets || 1 }, () => newSet()), painReports: []
+    }))
+  };
+}
+
+function updateExerciseStatus(e) {
+  if (e.status === 'skipped') return;
+  const target = e.sets.filter(isTargetSet);
+  e.status = isLightDone(e) || target.every(x => x.done) ? 'done' : 'pending';
+}
+
+async function finishSession() {
+  const s = training.active;
+  const sm = summarize(s);
+  if (sm.setCount === 0 && !s.exercises.some(isParticipated)) {
+    const discard = await confirmDialog({ title: '沒有任何紀錄', body: '<p>這次訓練還沒有完成任何一組。要捨棄這次訓練嗎？</p>', okText: '捨棄', cancelText: '繼續訓練', danger: true });
+    if (discard) { training.active = null; saveTraining(); stopTimer(); releaseWakeLock(); ui.inSession = false; ui.tab = 'home'; render(); toast('已捨棄'); }
+    return;
+  }
+  const o = sm.outcomes;
+  const ok = await confirmDialog({
+    title: '結束訓練？',
+    body: `<p>已完成 ${sm.setCount} 組。完整完成 ${o.full} 個、疼痛安全跳過 ${o.safe} 個。</p>
+      ${o.partial ? `<p class="yellow">有 <b>${o.partial}</b> 個動作只完成部分組數。</p>` : ''}
+      ${o.none ? `<p>還有 <b>${o.none}</b> 個動作沒有做。</p>` : ''}
+      ${sm.full ? '<p class="lime">✓ 符合完整課表！</p>' : '<p class="small muted">這次不符合「完整課表」，不會拿到完整課表獎勵，但已完成的部分照樣有獎勵，也沒有懲罰。</p>'}`,
+    okText: '結束並結算', cancelText: '繼續訓練'
+  });
+  if (!ok) return;
+
+  const lvBefore = levelInfo(game.exp).level;
+  const itemsBefore = new Set(unlockedItemIds());
+  s.endedAt = Date.now();
+  if (s.pausedAt) { s.pausedMs += s.endedAt - s.pausedAt; s.pausedAt = null; }
+  s.status = 'completed';
+  s.summary = summarize(s);   // 快取（畫面一律即時重算，不依賴這份）
+  training.sessions.push(s);
+  training.active = null;
+  saveTraining();
+
+  const reward = awardSession(s);
+  const newAch = checkAchievements();
+  saveGame();
+  const lvAfter = levelInfo(game.exp).level;
+  const newItems = unlockedItemIds().filter(id => !itemsBefore.has(id));
+  const prs = computePRs().filter(p => p.sessionId === s.id);
+
+  stopTimer(); releaseWakeLock();
+  ui.inSession = false; ui.tab = 'home'; ui.open = {}; ui.focus = {}; ui.info = {};
+  render();
+  if (lvAfter > lvBefore) beep(4, 1200);
+  openModal('QUEST CLEAR!', resultHTML(s, reward, lvBefore, lvAfter, newAch, newItems, prs));
+}
+
+function downloadFile(name, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function exportJSON() {
+  const data = { app: BACKUP_APP, version: BACKUP_VERSION, exportedAt: new Date().toISOString(), training, game, settings };
+  downloadFile(`pixel-fitness-backup-${ymd()}.json`, JSON.stringify(data, null, 2), 'application/json');
+  toast('已匯出完整備份');
+}
+function csvCell(v) { const s = String(v ?? ''); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }
+function exportCSV() {
+  const head = ['日期', '紀錄ID', '訓練日', '課表動作', '實際做的動作', '動作狀態', '組別', '額外組', '本次減量', '完成', '次數', '左側', '右側', '秒數', '重量kg', '阻力帶', 'RIR', '備註', '訓練分鐘'];
+  const rows = [head];
+  completedSessions().forEach(s => {
+    const mins = Math.round(elapsedMs(s) / 60000);
+    s.exercises.forEach(e => {
+      const def = EX[e.exerciseId];
+      const st = OUTCOME_LABEL[exerciseOutcome(e)];
+      e.sets.forEach((x, i) => rows.push([s.date, s.id, DAY[s.dayId].title, def.name, variantName(def, x.alt), st, i + 1, x.extra ? '是' : '', x.dropped ? '是' : '', x.done ? '是' : '否', x.reps, variantDef(def, x.alt).type === 'time' ? (x.secondsL ?? '') : (x.repsL ?? ''), variantDef(def, x.alt).type === 'time' ? (x.secondsR ?? '') : (x.repsR ?? ''), x.seconds, x.weight, x.band, x.rir, x.note, mins]));
+    });
+  });
+  downloadFile(`pixel-fitness-records-${ymd()}.csv`, '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\n'), 'text/csv');
+  toast('已匯出 CSV');
+}
+const BACKUP_APP = 'pixel-fitness-rpg';
+const BACKUP_VERSION = 3;          // 3：新版課表（匯入時一律以新版課表的動作檢查）
+const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+const isStr = v => typeof v === 'string';
+const isNum = v => typeof v === 'number' && Number.isFinite(v);
+const isDate = v => isStr(v) && /^\d{4}-\d{2}-\d{2}$/.test(v);
+const optType = (v, fn) => v === undefined || v === null || fn(v);
+
+/** 檢查一筆訓練紀錄；回傳錯誤訊息陣列 */
+function validateSession(sess, where, expectStatus) {
+  const err = [];
+  if (!isObj(sess)) return [`${where}：不是物件`];
+  if (!isStr(sess.id) || !sess.id) err.push(`${where}：缺少 id`);
+  if (!DAY[sess.dayId]) err.push(`${where}：未知的訓練日 ${String(sess.dayId)}`);
+  if (sess.kind !== 'formal') err.push(`${where}：kind 必須是 formal（新版課表沒有恢復日）`);
+  if (!isDate(sess.date)) err.push(`${where}：日期格式錯誤`);
+  if (!isNum(sess.startedAt)) err.push(`${where}：缺少開始時間`);
+  if (expectStatus && sess.status !== expectStatus) err.push(`${where}：狀態應為 ${expectStatus}`);
+  if (!expectStatus && !isStr(sess.status)) err.push(`${where}：缺少狀態`);
+  if (!optType(sess.endedAt, isNum) || !optType(sess.pausedMs, isNum) || !optType(sess.pausedAt, isNum)) err.push(`${where}：時間欄位型態錯誤`);
+  if (!Array.isArray(sess.exercises)) { err.push(`${where}：exercises 不是陣列`); return err; }
+  sess.exercises.forEach((e, i) => {
+    const w = `${where} 動作 ${i + 1}`;
+    if (!isObj(e)) { err.push(`${w}：不是物件`); return; }
+    if (!EX[e.exerciseId]) err.push(`${w}：未知的動作 ${String(e.exerciseId)}`);
+    if (!isStr(e.status)) err.push(`${w}：缺少狀態`);
+    if (!optType(e.painReports, Array.isArray)) err.push(`${w}：painReports 不是陣列`);
+    if (!optType(e.reduced, v => isObj(v) && isNum(v.count) && v.count >= 1)) err.push(`${w}：reduced 格式錯誤`);
+    if (!Array.isArray(e.sets)) { err.push(`${w}：sets 不是陣列`); return; }
+    e.sets.forEach((x, k) => {
+      if (!isObj(x)) err.push(`${w} 第 ${k + 1} 組：不是物件`);
+      else if (typeof x.done !== 'boolean') err.push(`${w} 第 ${k + 1} 組：done 必須是 true/false`);
+      else if (!optType(x.dropped, v => typeof v === 'boolean')) err.push(`${w} 第 ${k + 1} 組：dropped 必須是 true/false`);
+      else if (x.dropped && x.done) err.push(`${w} 第 ${k + 1} 組：減量的組不能同時標為完成`);
+    });
+  });
+  return err;
+}
+/** 完整檢查備份檔；只要有錯就回傳錯誤，不會動到目前資料 */
+function validateBackup(data) {
+  const err = [];
+  if (!isObj(data)) return ['檔案內容不是物件'];
+  if (data.app !== BACKUP_APP) err.push(`app 名稱不符（應為 ${BACKUP_APP}）`);
+  if (!isNum(data.version) || data.version < 1 || data.version > BACKUP_VERSION) err.push(`版本 ${String(data.version)} 不支援（支援 1–${BACKUP_VERSION}）`);
+  if (!isObj(data.training)) err.push('缺少 training');
+  else {
+    if (!Array.isArray(data.training.sessions)) err.push('training.sessions 不是陣列');
+    else {
+      const ids = new Set();
+      data.training.sessions.forEach((sess, i) => {
+        err.push(...validateSession(sess, `紀錄 ${i + 1}`, 'completed'));
+        if (isObj(sess) && ids.has(sess.id)) err.push(`紀錄 ${i + 1}：id 重複`);
+        if (isObj(sess)) ids.add(sess.id);
+      });
+    }
+    if (data.training.active !== null && data.training.active !== undefined) err.push(...validateSession(data.training.active, '未完成的訓練', 'active'));
+  }
+  if (!isObj(data.game)) err.push('缺少 game');
+  else {
+    const g = data.game;
+    if (!isNum(g.exp) || g.exp < 0) err.push('game.exp 必須是 0 以上的數字');
+    if (!isNum(g.gold)) err.push('game.gold 必須是數字');
+    ['awarded', 'dayFlags', 'weekGoals', 'checkAwarded', 'achievements', 'bosses', 'equipped'].forEach(k => { if (!optType(g[k], isObj)) err.push(`game.${k} 必須是物件`); });
+    if (!optType(g.inventory, Array.isArray)) err.push('game.inventory 必須是陣列');
+    if (!optType(g.name, isStr)) err.push('game.name 必須是文字');
+  }
+  if (!isObj(data.settings)) err.push('缺少 settings');
+  else ['sound', 'vibrate'].forEach(k => { if (!optType(data.settings[k], v => typeof v === 'boolean')) err.push(`settings.${k} 必須是 true/false`); });
+  return err;
+}
+function importJSONFile(file) {
+  const reader = new FileReader();
+  reader.onload = async () => {
+    let data;
+    try { data = JSON.parse(reader.result); } catch (e) {
+      openModal('無法匯入', '<div class="alert stop">檔案不是有效的 JSON。目前的資料沒有任何變動。</div>'); return;
+    }
+    const errors = validateBackup(data);
+    if (errors.length) {
+      openModal('無法匯入', `<div class="alert stop">備份檔格式錯誤，已拒絕匯入。目前的資料沒有任何變動。</div>
+        <ul class="rules small">${errors.slice(0, 12).map(t => `<li>${esc(t)}</li>`).join('')}</ul>${errors.length > 12 ? `<p class="tiny muted">…還有 ${errors.length - 12} 個錯誤</p>` : ''}`);
+      return;
+    }
+    const ok = await confirmDialog({
+      title: '匯入備份',
+      body: `<p>備份時間：${esc(data.exportedAt || '未知')}<br>訓練紀錄：${data.training.sessions.length} 筆${data.training.active ? '（含 1 筆未完成）' : ''}</p>
+        <p class="red">匯入會<b>取代</b>目前所有資料（訓練紀錄、遊戲進度、設定）。</p>
+        <div class="alert mid">建議先匯出目前的備份：<button class="btn sm" data-act="exportJSON">⬇ 先匯出目前備份</button></div>`,
+      okText: '取代並匯入', danger: true
+    });
+    if (!ok) return;
+    // 先保留目前的原始資料；任何一步寫入失敗就還原
+    const backupRaw = Object.values(KEYS).map(k => [k, localStorage.getItem(k)]);
+    try {
+      const t = Object.assign(defaultTraining(), JSON.parse(JSON.stringify(data.training)));
+      t.sessions.forEach(normalizeSession); if (t.active) normalizeSession(t.active);
+      const g = Object.assign(defaultGame(), JSON.parse(JSON.stringify(data.game)));
+      g.equipped = Object.assign(defaultGame().equipped, g.equipped || {});
+      const st = Object.assign(defaultSettings(), data.settings);
+      localStorage.setItem(KEYS.training, JSON.stringify(t));
+      localStorage.setItem(KEYS.game, JSON.stringify(g));
+      localStorage.setItem(KEYS.settings, JSON.stringify(st));
+    } catch (e) {
+      backupRaw.forEach(([k, v]) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e2) { } });
+      openModal('無法匯入', '<div class="alert stop">寫入時發生錯誤，已還原成匯入前的資料。</div>');
+      return;
+    }
+    toast('匯入完成，重新載入中…');
+    setTimeout(() => location.reload(), 400);   // 重新載入畫面與資料
+  };
+  reader.readAsText(file);
+}
+
+/** 依照按鈕的 data-act 執行對應動作 */
+const ACTIONS = {
+  tab(el) { ui.tab = el.dataset.tab; render(); window.scrollTo(0, 0); },
+  workoutSub(el) { ui.workoutSub = el.dataset.sub; render(); },
+  planDay(el) { ui.planDay = el.dataset.day; render(); },
+  viewPlan(el) { ui.tab = 'workout'; ui.workoutSub = 'plan'; ui.planDay = el.dataset.day; ui.inSession = false; render(); window.scrollTo(0, 0); },
+  toggleInfo(el) { const k = el.dataset.k; ui.info[k] = !ui.info[k]; render(); },
+  closeModal() { closeModal(); },
+  modalBack(el, ev) { if (ev.target === el) closeModal(); },
+  statsRange(el) { ui.statsRange = el.dataset.v; render(); },
+
+  openVideos() { ui.tab = 'workout'; ui.workoutSub = 'videos'; ui.inSession = false; render(); window.scrollTo(0, 0); },
+  async startDay(el) {
+    const dayId = el.dataset.day;
+    if (!DAY[dayId]) return;
+    if (training.active) {
+      const goResume = await confirmDialog({ title: '還有未完成的訓練', body: `<p>${esc(DAY[training.active.dayId].title)}（${fmtDate(training.active.date)}）還沒結束。</p><p class="small muted">要繼續那次訓練，還是先到那次訓練結算／捨棄後再開始新的？</p>`, okText: '繼續未完成的訓練', cancelText: '取消' });
+      if (goResume) ACTIONS.resumeSession();
+      return;
+    }
+    ui.pre = { dayId, shoulder: 0, back: 0, wrist: 0, numb: 'none' };
+    openModal('身體狀況確認', precheckHTML());
+  },
+  confirmStart() {
+    const p = ui.pre;
+    training.active = createSession(p.dayId, { shoulder: p.shoulder, back: p.back, wrist: p.wrist, numb: p.numb });
+    saveTraining(); closeModal();
+    ui.tab = 'workout'; ui.inSession = true; ui.open = {}; ui.focus = {}; ui.info = {};
+    requestWakeLock(); render(); window.scrollTo(0, 0);
+  },
+  resumeSession() {
+    ui.tab = 'workout'; ui.inSession = true; requestWakeLock(); render(); window.scrollTo(0, 0);
+  },
+  pauseSession() {
+    const s = training.active; if (!s || s.pausedAt) return;
+    s.pausedAt = Date.now();
+    if (timer.on && timer.pausedLeft === null) timer.pausedLeft = timerLeftMs();
+    saveTraining(); render(); renderTimer();
+  },
+  resumeTimerSession() {
+    const s = training.active; if (!s) return;
+    if (s.pausedAt) { s.pausedMs += Date.now() - s.pausedAt; s.pausedAt = null; }
+    if (timer.on && timer.pausedLeft !== null) { timer.endAt = Date.now() + timer.pausedLeft; timer.pausedLeft = null; }
+    saveTraining(); requestWakeLock(); render(); renderTimer();
+  },
+  leaveSession() {
+    const s = training.active;
+    if (s && !s.pausedAt) s.pausedAt = Date.now(); // 暫離時自動暫停計時
+    saveTraining(); stopTimer(); releaseWakeLock();
+    ui.inSession = false; ui.tab = 'home'; render(); window.scrollTo(0, 0);
+    toast('💾 進度已保存，回來可以繼續');
+  },
+  finishSession() { finishSession(); },
+  toggleWarmup(el) { training.active.warmupDone = el.checked; saveTraining(); },
+  toggleCooldown(el) { training.active.cooldownDone = el.checked; saveTraining(); },
+  toggleCard(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i];
+    const cur = ui.open[i] !== undefined ? ui.open[i] : e.status === 'pending';
+    ui.open[i] = !cur; render();
+  },
+  focusSet(el) { ui.focus[+el.dataset.i] = +el.dataset.s; render(); },
+
+  completeSet(el) {
+    const i = +el.dataset.i, si = +el.dataset.s;
+    const s = training.active, e = s.exercises[i], x = e.sets[si];
+    const def = variantDef(EX[e.exerciseId], x.done ? x.alt : e.altIndex);
+    if (def.perSide && def.type !== 'hiit') {
+      const [kl, kr, kb] = sideKeys(def);
+      if (num(x[kl]) === null || num(x[kr]) === null) { toast(`請輸入左右兩側的實際${def.type === 'time' ? '秒數' : '次數'}（相同可按「＝ 左右相同」）`); return; }
+      x[kb] = String(Math.min(num(x[kl]), num(x[kr])));   // 舊欄位存「兩側都做到的數」，讓歷史比較與舊版相容
+    }
+    if (def.type === 'reps' && num(x.reps) === null) { toast('請先輸入實際完成次數'); return; }
+    if (def.type === 'time' && num(x.seconds) === null) { toast('請先輸入實際完成秒數'); return; }
+    const wasDone = x.done;
+    if (!wasDone) {
+      x.alt = e.altIndex ?? null;   // 記下這一組實際做的版本
+      const next = e.sets.find((y, k) => k > si && isOpenSet(y));
+      if (next && next.weight === '' && next.band === '') { next.weight = x.weight; next.band = x.band; }
+    }
+    x.done = true; x.completedAt = x.completedAt || Date.now();
+    updateExerciseStatus(e);
+    delete ui.focus[i];
+    saveTraining();
+    if (!wasDone) {
+      const moreSets = exerciseOutcome(e) !== 'full' && e.sets.some(isOpenSet);
+      const moreEx = s.exercises.slice(i + 1).some(y => y.status === 'pending');
+      if (def.type !== 'hiit' && def.restSeconds && (moreSets || moreEx)) {
+        startTimer(def.restSeconds, moreSets ? `組間休息 · ${def.name}` : '休息後進入下一個動作');
+      }
+      if (!moreSets) { ui.open[i] = false; toast(`✓ ${def.name} 完成！`); }
+      beep(1, 760);
+    } else toast('已儲存修改');
+    render();
+    if (exerciseOutcome(e) === 'full' || !e.sets.some(isOpenSet)) {
+      const next = document.getElementById('card' + (i + 1));
+      if (next) next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+  undoSet(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i];
+    e.sets[+el.dataset.s].done = false; updateExerciseStatus(e); saveTraining(); render();
+  },
+  addSet(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i];
+    e.sets.push(newSet(true)); ui.focus[i] = e.sets.length - 1; ui.open[i] = true; saveTraining(); render();
+  },
+  removeSet(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i];
+    e.sets.splice(+el.dataset.s, 1); delete ui.focus[i]; saveTraining(); render();
+  },
+  painReport(el) { ui.pain = { idx: +el.dataset.i, score: 0, numb: false }; openModal('回報疼痛／不適', painHTML()); },
+  submitPain(el) {
+    const p = ui.pain, e = training.active.exercises[p.idx], def = EX[e.exerciseId];
+    e.painReports.push({ score: p.score, numb: p.numb, at: Date.now() });
+    const mode = el.dataset.mode;
+    if (mode === 'swap') { e.altIndex = 0; ui.open[p.idx] = true; toast(def.alternatives.length > 1 ? `已換成「${def.alternatives[0].name}」，卡片上可以選其他替代動作` : `已換成「${def.alternatives[0].name}」`); }
+    if (mode === 'skip') { e.status = 'skipped'; e.skipReason = 'pain'; ui.open[p.idx] = false; stopTimer(); toast('已跳過。安全第一，不會扣 EXP'); }
+    if (mode === 'continue') toast('已記錄，留意身體反應');
+    saveTraining(); closeModal(); render();
+  },
+  reduceSet(el) {
+    const i = +el.dataset.i, s = training.active, e = s.exercises[i];
+    if (!s.worseNote || !canReduce(e)) return;
+    // 拿掉最後一個還沒做的規定組（已完成的組與安全跳過紀錄都不動）
+    const target = e.sets.map((x, k) => k).filter(k => isTargetSet(e.sets[k]) && !e.sets[k].done);
+    const k = target[target.length - 1];
+    e.sets[k].dropped = true;
+    e.reduced = { count: 1, reason: 'nextDayWorse', at: Date.now() };
+    delete ui.focus[i]; updateExerciseStatus(e); saveTraining(); render();
+    toast(`這次少做一組：目標改為 ${e.sets.filter(isTargetSet).length} 組`);
+  },
+  restoreSet(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i];
+    e.sets.forEach(x => { delete x.dropped; });
+    delete e.reduced;
+    updateExerciseStatus(e); saveTraining(); render();
+    toast('已恢復課表原本的組數');
+  },
+  sameSides(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i], x = e.sets[+el.dataset.s];
+    const def = variantDef(EX[e.exerciseId], e.altIndex);
+    const [kl, kr] = sideKeys(def);
+    const v = num(x[kl]) !== null ? x[kl] : x[kr];
+    if (num(v) === null) { toast('請先填其中一側'); return; }
+    x[kl] = x[kr] = String(v); saveTraining(); render();
+  },
+  quickFill(el) {
+    const x = training.active.exercises[+el.dataset.i].sets[+el.dataset.s];
+    if (el.dataset.k === 'bottle') { x.weight = String(GEAR.bottleKg); x.band = x.band || ''; }
+    if (el.dataset.k === 'band') { x.band = GEAR.bandLabel; }
+    saveTraining(); render();
+  },
+  painSwap(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i], def = EX[e.exerciseId];
+    e.painReports.push({ score: null, numb: false, at: Date.now(), source: 'precheck' });
+    e.altIndex = 0; ui.open[i] = true; saveTraining(); render();
+    toast(`已換成「${def.alternatives[0].name}」`);
+  },
+  painSkip(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i];
+    e.painReports.push({ score: null, numb: false, at: Date.now(), source: 'precheck' });
+    e.status = 'skipped'; e.skipReason = 'pain'; ui.open[i] = false; saveTraining(); render();
+    toast('已跳過。安全第一，照樣有 EXP');
+  },
+  pickVariant(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i], def = EX[e.exerciseId];
+    e.altIndex = el.dataset.v === '' ? null : +el.dataset.v;
+    delete ui.focus[i]; ui.open[i] = true;
+    saveTraining(); render();
+    toast(e.altIndex === null ? `已換回原動作：${def.name}` : `已換成替代動作：${def.alternatives[e.altIndex].name}`);
+  },
+  skipEx(el) {
+    const i = +el.dataset.i;
+    openModal('跳過這個動作', `<p>跳過的原因：</p><div class="item-list">
+      ${[['pain', '😣 疼痛／不適（不會扣 EXP，仍算安全完成）'], ['equip', '🧰 器材問題'], ['time', '⏰ 時間不夠'], ['other', '其他']].map(([k, l]) => `<button class="btn block ghost" data-act="doSkip" data-i="${i}" data-r="${k}">${l}</button>`).join('')}</div>
+      <p class="tiny muted mt">跳過不會扣分。疼痛時請一律選第一項，安全比獎勵重要。</p>`);
+  },
+  doSkip(el) {
+    const i = +el.dataset.i, e = training.active.exercises[i];
+    e.status = 'skipped'; e.skipReason = el.dataset.r; ui.open[i] = false;
+    saveTraining(); closeModal(); render();
+  },
+  unskip(el) { const e = training.active.exercises[+el.dataset.i]; e.status = 'pending'; e.skipReason = null; updateExerciseStatus(e); saveTraining(); render(); },
+
+  startWork(el) {
+    const i = +el.dataset.i, si = +el.dataset.s;
+    const e = training.active.exercises[i], def = variantDef(EX[e.exerciseId], e.altIndex);   // 依目前選的動作計時（例如 3 分鐘、跪姿側棒式）
+    startTimer(def.duration, `計時中 · ${def.name}${def.perSide ? '（單邊）' : ''}`, 'work', () => {
+      const s = training.active; if (!s) return;
+      const x = s.exercises[i] && s.exercises[i].sets[si];
+      if (x && def.perSide) {
+        const k = num(x.secondsL) === null ? 'secondsL' : num(x.secondsR) === null ? 'secondsR' : null;
+        if (k) { x[k] = String(def.duration); saveTraining(); render(); }
+        toast(k === 'secondsL' ? '左側時間到！換右側再計時一次' : '時間到！確認秒數後按「完成本組」');
+        return;
+      }
+      if (x && num(x.seconds) === null) { x.seconds = String(def.duration); saveTraining(); render(); }
+      toast('時間到！確認秒數後按「完成本組」');
+    });
+  },
+  startHiit(el) {
+    const i = +el.dataset.i, sess = training.active, def = EX[sess.exercises[i].exerciseId];
+    const rounds = sess.exercises[i].sets.map((x, k) => k).filter(k => !sess.exercises[i].sets[k].done);
+    if (!rounds.length) return;
+    const phases = [];
+    rounds.forEach(r => {
+      def.hiitMoves.forEach((m, k) => {
+        const nextMove = def.hiitMoves[k + 1] || (r !== rounds[rounds.length - 1] ? `第 ${r + 2} 輪：${def.hiitMoves[0]}` : null);
+        phases.push({ sec: def.duration, label: `第 ${r + 1}/${def.sets} 輪 · 動！${m}`, mode: 'work' });
+        phases.push({ sec: def.restSeconds, label: `第 ${r + 1}/${def.sets} 輪 · 休息：原地慢走${nextMove ? ' · 下一個：' + nextMove : ''}`, mode: 'rest',
+          // 一輪的最後一段休息結束 → 這一輪自動打勾
+          onEnd: k === def.hiitMoves.length - 1 ? () => {
+            const s2 = training.active; if (!s2 || s2.id !== sess.id) return;
+            const ex = s2.exercises[i], x = ex.sets[r];
+            if (x && !x.done) { x.done = true; x.completedAt = Date.now(); x.alt = null; updateExerciseStatus(ex); saveTraining(); render(); }
+          } : null });
+      });
+    });
+    startPhases(phases, () => toast(`🔥 HIIT 完成 ${rounds.length} 輪！`));
+    beep(2, 1040);
+  },
+  timerAdj(el) {
+    const d = +el.dataset.v * 1000;
+    if (timer.pausedLeft !== null) timer.pausedLeft = Math.max(0, timer.pausedLeft + d);
+    else timer.endAt = Math.max(Date.now(), timer.endAt + d);
+    timer.total = Math.max(timer.total, Math.ceil(timerLeftMs() / 1000));
+    timer.cue = {};   // 依新的剩餘時間重新判斷倒數音
+    renderTimer();
+  },
+  timerPause() {
+    if (timer.pausedLeft !== null) { timer.endAt = Date.now() + timer.pausedLeft; timer.pausedLeft = null; }
+    else timer.pausedLeft = timerLeftMs();
+    renderTimer();
+  },
+  timerSkip() {
+    if (timer.phases) { timerFinished(true); return; }   // 間歇計時：跳到下一段（最後一段也會觸發本輪打勾），跳過不播提示音
+    const cb = timer.onDone; stopTimer();
+    if (cb && timer.mode === 'work') cb();
+  },
+
+  nextDayCheck(el) {
+    const s = training.sessions.find(x => x.id === el.dataset.id); if (!s) return;
+    s.nextDay = { result: el.dataset.r, at: Date.now() };
+    saveTraining();
+    const r = awardNextDayCheck(s);
+    const newAch = checkAchievements(); saveGame();
+    toast(el.dataset.r === 'ok' ? `✓ 身體狀況 OK！+${r ? r.exp : 0} EXP` : '已記錄。依課表守則：下次少一組');
+    newAch.forEach(a => toast(`🏆 成就解鎖：${a.name}`));
+    if (training.active && el.dataset.r === 'worse') training.active.worseNote = true;
+    if (el.dataset.from === 'pre') openModal('身體狀況確認', precheckHTML());
+    render();
+  },
+
+  /* 角色 */
+  openSlot(el) { openModal(`${SLOTS.find(s => s.id === el.dataset.slot).name}`, slotModalHTML(el.dataset.slot)); },
+  equip(el) {
+    const it = ITEM[el.dataset.id]; if (!it || !isItemUnlocked(it)) return;
+    game.equipped[it.slot] = it.id; saveGame(); render();
+    openModal(`${SLOTS.find(s => s.id === it.slot).name}`, slotModalHTML(it.slot));
+  },
+  async buyItem(el) {
+    const it = ITEM[el.dataset.id];
+    if (game.gold < it.unlock.price) { toast('金幣不足'); return; }
+    const ok = await confirmDialog({ title: '購買裝備', body: `<p>用 ${it.unlock.price} G 購買「${esc(it.name)}」？</p>`, okText: '購買' });
+    if (!ok) return;
+    game.gold -= it.unlock.price; game.inventory.push(it.id); game.equipped[it.slot] = it.id;
+    saveGame(); render(); toast(`🎁 獲得 ${it.name}！`);
+  },
+  renameHero() {
+    openModal('角色名稱', `<label class="f">名稱<input type="text" id="heroName" maxlength="16" value="${esc(game.name)}"></label>
+      <div class="btn-row mt"><button class="btn ghost" data-act="closeModal">取消</button><button class="btn green" data-act="saveName">儲存</button></div>`);
+  },
+  saveName() { const v = document.getElementById('heroName').value.trim(); game.name = v || '冒險者'; saveGame(); closeModal(); render(); },
+
+  /* 地圖 */
+  openDex() { openModal('怪物圖鑑', dexHTML()); },
+  challengeBoss(el) {
+    const r = REGION[el.dataset.id], ctx = buildContext();
+    if (!bossReady(r, ctx) || game.bosses[r.id]) return;
+    const m = MONSTERS[r.boss.m];
+    openModal(`BOSS · ${esc(m.name)}`, `<p class="small">${esc(m.desc)}</p>
+      <div class="battle"><div id="bHero">${heroSVG(5)}</div><div id="bBoss">${monsterSVG(r.boss.m, 6)}</div></div>
+      <div class="row small mt"><span>HP</span><div class="bar hp grow"><i id="bHp" style="width:100%"></i></div></div>
+      <p id="bLog" class="center mt">你累積的訓練成果化為力量……</p>
+      <p class="tiny muted center">Boss 戰只看累積成果，不需要額外訓練。</p>`);
+    const hits = [70, 40, 15, 0];
+    hits.forEach((hp, k) => setTimeout(() => {
+      const hero = document.getElementById('bHero'), boss = document.getElementById('bBoss'), bar = document.getElementById('bHp'), log = document.getElementById('bLog');
+      if (!hero) return;
+      hero.classList.remove('hop'); boss.classList.remove('shake'); void hero.offsetWidth;
+      hero.classList.add('hop'); boss.classList.add('shake'); bar.style.width = hp + '%'; beep(1, 300 + k * 120);
+      log.textContent = ['STR 攻擊！', 'VIT 堅守！', 'DEX 連擊！', `擊敗了 ${m.name}！`][k];
+      if (hp === 0) {
+        game.bosses[r.id] = Date.now(); game.gold += r.boss.gold;
+        const before = new Set(unlockedItemIds());
+        const newAch = checkAchievements(); saveGame();
+        const items = ITEMS.filter(i => i.unlock.type === 'boss' && i.unlock.id === r.id).map(i => i.name);
+        log.innerHTML = `<span class="levelup">VICTORY!</span><br>+${r.boss.gold} G${items.length ? `<br>🎁 獲得：${items.map(esc).join('、')}` : ''}${newAch.length ? `<br>🏆 ${newAch.map(a => esc(a.name)).join('、')}` : ''}`;
+        beep(4, 1200); render();
+      }
+    }, 700 * (k + 1)));
+  },
+
+  /* 紀錄 */
+  histDetail(el) {
+    const s = training.sessions.find(x => x.id === el.dataset.id); if (!s) return;
+    openModal('訓練紀錄', sessionDetailHTML(s) + `<div class="btn-row mt"><button class="btn" data-act="histEdit" data-id="${s.id}">✎ 修改</button><button class="btn red" data-act="histDelete" data-id="${s.id}">🗑 刪除</button></div>`);
+  },
+  histEdit(el) { const s = training.sessions.find(x => x.id === el.dataset.id); if (s) openModal('修改紀錄', editHTML(s)); },
+  histSaveEdit(el) {
+    const s = training.sessions.find(x => x.id === el.dataset.id); if (!s) return;
+    const d = document.getElementById('edDate').value;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) s.date = d;
+    document.querySelectorAll('[data-ed]').forEach(inp => {
+      const [ei, si, field] = inp.dataset.ed.split('_');
+      const x = s.exercises[+ei].sets[+si];
+      x[field] = field === 'done' ? inp.checked : inp.value.trim();
+    });
+    // 單邊動作：依左右重新計算「兩側都做到的數」
+    s.exercises.forEach(e => {
+      const base = EX[e.exerciseId]; if (!base) return;
+      e.sets.forEach(x => {
+        const def = variantDef(base, x.alt); if (!def.perSide || def.type === 'hiit') return;
+        const [kl, kr, kb] = sideKeys(def);
+        if (num(x[kl]) !== null && num(x[kr]) !== null) x[kb] = String(Math.min(num(x[kl]), num(x[kr])));
+      });
+    });
+    s.exercises.forEach(updateExerciseStatus);
+    s.summary = summarize(s);
+    saveTraining(); closeModal(); render(); toast('紀錄已更新');
+  },
+  async histDelete(el) {
+    const s = training.sessions.find(x => x.id === el.dataset.id); if (!s) return;
+    const ok = await confirmDialog({ title: '刪除這筆紀錄？', body: `<p>${fmtDate(s.date)}｜${esc(DAY[s.dayId].title)}</p><p class="red">刪除後無法復原。</p><p class="tiny muted">已發放的遊戲獎勵不會被收回。</p>`, okText: '確定刪除', danger: true });
+    if (!ok) return;
+    training.sessions = training.sessions.filter(x => x.id !== s.id);
+    saveTraining(); render(); toast('已刪除');
+  },
+
+  /* 設定 */
+  openSettings() { openModal('設定與備份', settingsHTML()); },
+  exportJSON() { exportJSON(); },
+  exportCSV() { exportCSV(); },
+  importJSON() { document.getElementById('importFile').click(); },
+  async resetGame() {
+    const ok = await confirmDialog({ title: '重置遊戲角色？', body: '<p>會清除等級、EXP、金幣、裝備、成就與 Boss 紀錄。</p><p class="lime"><b>真實訓練紀錄會完整保留。</b></p>', okText: '重置遊戲', danger: true });
+    if (!ok) return;
+    const name = game.name;
+    game = defaultGame(); game.name = name;
+    // 已存在的訓練紀錄標記為已處理，避免之後重複發放；需要時可用「依訓練紀錄重算」
+    completedSessions().forEach(s => { game.awarded[s.id] = { exp: 0, gold: 0, reset: true }; if (s.nextDay) game.checkAwarded[s.id] = true; });
+    saveGame(); render(); toast(`遊戲已重置，訓練紀錄 ${completedSessions().length} 筆完整保留`);
+  },
+  async rebuildGame() {
+    const ok = await confirmDialog({ title: '依訓練紀錄重算？', body: '<p>會依照目前所有訓練紀錄，重新計算 EXP、金幣與成就。商店購買的裝備與 Boss 紀錄會清除（Boss 可以立即重新挑戰）。</p>', okText: '重算' });
+    if (!ok) return;
+    rebuildGameFromHistory(true); render(); toast(`已重算：Lv ${levelInfo(game.exp).level}`);
+  },
+  async clearHistory() {
+    const ok = await confirmDialog({ title: '刪除全部訓練紀錄？', body: `<p class="red">將刪除 ${training.sessions.length} 筆訓練紀錄與未完成的訓練，無法復原。</p>`, okText: '我了解，刪除', danger: true, requireText: '刪除' });
+    if (!ok) return;
+    const ok2 = await confirmDialog({ title: '最後確認', body: '<p>真的要刪除全部訓練紀錄嗎？建議先匯出備份。</p>', okText: '刪除全部', danger: true });
+    if (!ok2) return;
+    training = defaultTraining(); saveTraining(); stopTimer();
+    ui.inSession = false; render(); toast('已刪除全部訓練紀錄（遊戲進度保留）');
+  }
+};
+
+/* 點擊事件（事件委派） */
+document.addEventListener('click', ev => {
+  unlockAudio();   // iOS Safari：在使用者手勢中建立／恢復 AudioContext
+  const el = ev.target.closest('[data-act]');
+  if (!el) return;
+  const act = ACTIONS[el.dataset.act];
+  if (!act) return;
+  if (el.tagName === 'INPUT' && el.type === 'checkbox') { act(el, ev); return; }
+  act(el, ev);
+});
+
+/* 輸入事件：訓練中每組欄位即時保存（不重繪，避免輸入中斷） */
+document.addEventListener('input', ev => {
+  const t = ev.target;
+  if (t.dataset.field && training.active) {
+    const x = training.active.exercises[+t.dataset.i].sets[+t.dataset.s];
+    x[t.dataset.field] = t.value;
+    saveTraining();
+  } else if (t.dataset.pre && ui.pre) {
+    ui.pre[t.dataset.pre] = t.dataset.pre === 'numb' ? t.value : +t.value;
+    const pv = document.getElementById('pv_' + t.dataset.pre); if (pv) pv.textContent = t.value;
+    document.getElementById('preAlert').innerHTML = precheckAlertHTML();
+  } else if (t.dataset.painfield && ui.pain) {
+    ui.pain[t.dataset.painfield] = t.type === 'checkbox' ? t.checked : +t.value;
+    const pv = document.getElementById('painVal'); if (pv) pv.textContent = ui.pain.score;
+    document.getElementById('painAlert').innerHTML = painAlertHTML();
+  }
+});
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.dataset.change === 'statsMove') { ui.statsMove = t.value; render(); }
+  else if (t.dataset.setting) { settings[t.dataset.setting] = t.checked; saveSettings(); }
+  else if (t.dataset.pre && ui.pre) { ui.pre[t.dataset.pre] = t.dataset.pre === 'numb' ? t.value : +t.value; document.getElementById('preAlert').innerHTML = precheckAlertHTML(); }
+  else if (t.dataset.painfield && ui.pain) { ui.pain[t.dataset.painfield] = t.type === 'checkbox' ? t.checked : +t.value; document.getElementById('painAlert').innerHTML = painAlertHTML(); }
+});
+document.getElementById('importFile').addEventListener('change', ev => {
+  const f = ev.target.files[0]; if (f) importJSONFile(f); ev.target.value = '';
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    if (audioCtx && settings.sound && audioCtx.state !== 'running') audioCtx.resume().catch(() => {});   // 從背景回來時嘗試恢復音效
+    if (training.active && ui.inSession && !training.active.pausedAt) requestWakeLock(); tick();
+  }
+  else if (training.active) saveTraining();
+});
+window.addEventListener('pagehide', () => { if (training.active) saveTraining(); });
+
+/* =====================================================================
+   啟動
+   ===================================================================== */
+/** 補齊缺少的欄位（不改動已有的數值） */
+function normalizeSession(s) {
+  if (!Array.isArray(s.exercises)) s.exercises = [];
+  s.exercises.forEach(e => {
+    if (!Array.isArray(e.sets)) e.sets = [];
+    if (!Array.isArray(e.painReports)) e.painReports = [];
+    if (e.altIndex === undefined) e.altIndex = null;
+    e.sets.forEach(x => { if (x.alt === undefined) x.alt = null; ['repsL', 'repsR', 'secondsL', 'secondsR'].forEach(k => { if (x[k] === undefined) x[k] = ''; }); });
+  });
+}
+/** 紀錄裡的訓練日與動作都存在於目前課表 */
+function isKnownSession(s) {
+  return !!s && !!DAY[s.dayId] && Array.isArray(s.exercises) && s.exercises.every(e => e && EX[e.exerciseId]);
+}
+(function init() {
+  // 課表裡已經不存在的紀錄（例如舊版恢復日的測試資料）：移到 training.archived 保存，不顯示、不刪除
+  const unknown = training.sessions.filter(x => !isKnownSession(x));
+  if (training.active && !isKnownSession(training.active)) { unknown.push(training.active); training.active = null; }
+  if (unknown.length) {
+    training.archived = (Array.isArray(training.archived) ? training.archived : []).concat(unknown);
+    training.sessions = training.sessions.filter(isKnownSession);
+    saveJSON(KEYS.training, training);
+  }
+  // 已移除的裝備（恢復護符）：改回該欄位的初始裝備
+  Object.keys(game.equipped).forEach(k => { if (!ITEM[game.equipped[k]]) game.equipped[k] = defaultGame().equipped[k]; });
+  training.sessions.forEach(normalizeSession);
+  if (training.active) normalizeSession(training.active);
+  // 關掉網頁超過 10 分鐘才回來：從最後一次操作的時間自動暫停，避免訓練時間被灌水
+  const s = training.active;
+  if (s && !s.pausedAt && s.lastTouch && Date.now() - s.lastTouch > 10 * 60 * 1000) {
+    s.pausedAt = s.lastTouch; saveJSON(KEYS.training, training);
+  }
+  checkAchievements(); saveGame();
+  render();
+  setInterval(tick, 250);
+})();
+</script>
+</body>
+</html>
