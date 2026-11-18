@@ -1,0 +1,15 @@
+{
+  "name": "Pixel Fitness RPG｜像素健身冒險",
+  "short_name": "Pixel Fitness",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1c2c",
+  "theme_color": "#1a1c2c",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

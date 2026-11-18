@@ -9,6 +9,10 @@
 <meta name="apple-mobile-web-app-title" content="Pixel Fitness">
 <meta name="theme-color" content="#1a1c2c">
 <title>Pixel Fitness RPG｜像素健身冒險</title>
+<!-- App 圖示（相對路徑：部署在 GitHub Pages 子目錄 /pixel-fitness-rpg/ 也能正確載入） -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <!-- 像素英文字體（只用於數字與英文標題；沒有網路時會自動改用系統字體，不影響功能） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -156,6 +160,7 @@ button{font:inherit;color:inherit}
 .ex-card.skipped{border-color:var(--dim);opacity:.85}
 .ex-card.swapped{border-color:var(--cyan)}
 .ex-card.flagged{border-color:var(--red)}
+.gear-bar{padding:10px 12px;margin-top:16px}
 .variant-pick{background:var(--black);border:2px solid var(--cyan);padding:8px;margin:10px 0 4px;display:flex;flex-direction:column;gap:6px}
 .variant-pick .lbl{font-size:12px;font-weight:800;color:var(--muted)}
 .vbtn{min-height:44px;text-align:left;padding:8px 10px;background:var(--panel);border:2px solid var(--black);color:var(--ink);font-weight:700;font-size:14px;cursor:pointer}
@@ -681,13 +686,27 @@ const FORMAL_DAYS = DAYS.filter(d => d.kind === 'formal');
 /* 不明確、需要確認的地方（目前沒有；有的話會顯示在「訓練 › 課表」頁面最下方） */
 const DATA_GAPS = [];
 
-/* 使用者已確認的器材與做法 */
-const GEAR = { bandLb: 15, bandLabel: '15 磅環狀帶', bottleKg: 1.2, bottleLabel: '水瓶 1.2 公升' };
-const CONFIRMED_NOTES = [
+/* 器材重量：可在「器材設定」修改，存在 settings.gear（LocalStorage）。
+   修改只影響之後的快速填入；已記錄的組數保留當時填入的數值。 */
+const GEAR_DEFAULT = { bandLb: 15, bottleKg: 1.2 };
+const GEAR_LIMIT = { bandLb: [1, 300], bottleKg: [0.1, 20] };   // 合理範圍，避免輸入錯誤
+function gearValue(k) {
+  const g = settings && settings.gear ? settings.gear : {};
+  const v = Number(g[k]);
+  return Number.isFinite(v) && v >= GEAR_LIMIT[k][0] && v <= GEAR_LIMIT[k][1] ? v : GEAR_DEFAULT[k];
+}
+const GEAR = {
+  get bandLb() { return gearValue('bandLb'); },
+  get bottleKg() { return gearValue('bottleKg'); },
+  get bandLabel() { return `${this.bandLb} 磅環狀帶`; },
+  get bottleLabel() { return `水瓶 ${this.bottleKg} kg`; }
+};
+/* 使用者已確認的做法（器材重量那一行依目前設定顯示） */
+const confirmedNotes = () => [
   '居家 HIIT：每個動作做 30 秒、休息 20 秒，輪與輪之間也是休息 20 秒。',
   '3 分鐘腿部訓練是 HIIT 的輕鬆版替代：做 1 次、完整 3 分鐘就算完成當天的 HIIT 替代項目，不和 HIIT 重複計算。',
   '替代動作沿用原主要動作的組數與休息時間，次數依新版課表。',
-  `阻力帶是 ${GEAR.bandLb} 磅環狀帶；水瓶是 1.2 公升（約 ${GEAR.bottleKg} kg）。`,
+  `目前器材設定：阻力帶 ${GEAR.bandLb} lb、水瓶 ${GEAR.bottleKg} kg（可在「器材設定」修改）。`,
   '單腳提踵用瑜伽磚代替樓梯。',
   '熱身與收操只需要「已完成」勾選，不逐組記錄。',
   '訓練量（kg）只計算有填重量的組數。阻力帶的拉力會隨拉長程度改變，所以記成「阻力設定」，不換算成公斤。'
@@ -860,7 +879,7 @@ function defaultGame() {
     createdAt: Date.now()
   };
 }
-function defaultSettings() { return { version: 1, sound: true, vibrate: true }; }
+function defaultSettings() { return { version: 1, sound: true, vibrate: true, gear: { bandLb: GEAR_DEFAULT.bandLb, bottleKg: GEAR_DEFAULT.bottleKg } }; }
 
 function loadJSON(key, fallbackFn) {
   try {
@@ -880,6 +899,7 @@ function saveJSON(key, data) {
 let training = loadJSON(KEYS.training, defaultTraining);
 let game = loadJSON(KEYS.game, defaultGame);
 let settings = loadJSON(KEYS.settings, defaultSettings);
+if (!settings.gear || typeof settings.gear !== 'object') settings.gear = defaultSettings().gear;
 game.equipped = Object.assign(defaultGame().equipped, game.equipped || {});
 
 function saveTraining() {
@@ -1724,6 +1744,7 @@ function viewPlan() {
   if (!ui.planDay) { const sug = todaySuggestion(); ui.planDay = sug.day ? sug.day.id : 'd1'; }
   const d = DAY[ui.planDay];
   let h = `<div class="seg">${DAYS.map(x => `<button class="${x.id === d.id ? 'on' : ''}" data-act="planDay" data-day="${x.id}">${esc(x.label)}<br><span class="tiny">${esc(x.short)}</span></button>`).join('')}</div>`;
+  h += gearBarHTML();
 
   h += `<div class="box alt"><div class="box-title">${esc(d.code)}</div>
     <h2>${esc(d.title)}</h2><p class="small muted">${esc(d.header)}</p>
@@ -1749,8 +1770,8 @@ function viewPlan() {
     <p class="tiny muted">遊戲會在符合條件時提示，但不會自動更改課表。</p></div>
     <div class="box"><div class="box-title">飲食搭配</div>${rulesList(NUTRITION_NOTES)}</div>
     <div class="box"><div class="box-title">課表總覽</div>
-      <ul class="rules"><li>${esc(PLAN_META.schedule)}</li><li>${esc(PLAN_META.split)}</li><li>器材：${esc(PLAN_META.equipment)}<br><span class="small muted">實際：阻力帶 15 磅、水瓶 1.2 公升、單腳提踵用瑜伽磚</span></li><li>${esc(PLAN_META.flow)}</li></ul></div>
-    <div class="box good"><div class="box-title">已確認</div>${rulesList(CONFIRMED_NOTES)}</div>
+      <ul class="rules"><li>${esc(PLAN_META.schedule)}</li><li>${esc(PLAN_META.split)}</li><li>器材：${esc(PLAN_META.equipment)}<br><span class="small muted">實際：阻力帶 ${GEAR.bandLb} lb、水瓶 ${GEAR.bottleKg} kg、單腳提踵用瑜伽磚</span></li><li>${esc(PLAN_META.flow)}</li></ul></div>
+    <div class="box good"><div class="box-title">已確認</div>${rulesList(confirmedNotes())}</div>
     ${DATA_GAPS.length ? `<details class="box"><summary>待確認的資料（${DATA_GAPS.length} 項）</summary>${rulesList(DATA_GAPS)}</details>` : ''}`;
   return h;
 }
@@ -1996,6 +2017,7 @@ function sessionDetailHTML(s) {
     ${outcomeTilesHTML(sm)}
     <p class="small mt">訓練量：${sm.volume ? fmtNum(sm.volume) + ' kg' : '—'}</p>
     <p class="tiny muted">訓練量只計算有填重量的組數（${sm.weightedSets} 組）；阻力帶與徒手組數不換算。</p>`;
+  if (s.gear) h += `<p class="small">當次器材設定：阻力帶 ${esc(s.gear.bandLb)} lb／水瓶 ${esc(s.gear.bottleKg)} kg</p>`;
   if (s.precheck) h += `<p class="small">開始前：肩 ${s.precheck.shoulder}／下背 ${s.precheck.back}／手腕 ${s.precheck.wrist}；手麻：${{ none: '沒有', same: '和平常一樣', worse: '比平常明顯' }[s.precheck.numb]}</p>`;
   if (s.nextDay) h += `<p class="small">隔天檢查：${s.nextDay.result === 'ok' ? '✓ 回到原本狀態' : '✗ 變更糟（下次少一組）'}</p>`;
   return h + sessionTableHTML(s);
@@ -2353,10 +2375,31 @@ function resultHTML(s, reward, lvBefore, lvAfter, newAch, newItems, prs) {
     <button class="btn big block green mt" data-act="closeModal">回到冒險</button>`;
 }
 
+/* ---------- 器材設定 ---------- */
+/** 訓練頁上方：目前器材重量＋修改按鈕 */
+function gearBarHTML() {
+  return `<div class="box gear-bar"><div class="box-title">器材</div>
+    <div class="row between wrap"><span>🎗 阻力帶 <b class="yellow px tiny">${GEAR.bandLb} lb</b>　🍶 水瓶 <b class="yellow px tiny">${GEAR.bottleKg} kg</b></span>
+    <button class="btn sm ghost" data-act="openGear">⚙ 器材設定</button></div></div>`;
+}
+/** 器材設定表單（彈窗與設定區共用） */
+function gearFormHTML(from) {
+  return `<p class="small">目前使用：🎗 阻力帶 <b class="yellow">${GEAR.bandLb} lb</b>　🍶 水瓶 <b class="yellow">${GEAR.bottleKg} kg</b></p>
+    <div class="fgrid">
+      <label class="f">阻力帶重量（lb）<input class="big-num" type="number" inputmode="decimal" step="0.5" min="${GEAR_LIMIT.bandLb[0]}" max="${GEAR_LIMIT.bandLb[1]}" id="gearBand" value="${GEAR.bandLb}"></label>
+      <label class="f">水瓶重量（kg）<input class="big-num" type="number" inputmode="decimal" step="0.1" min="${GEAR_LIMIT.bottleKg[0]}" max="${GEAR_LIMIT.bottleKg[1]}" id="gearBottle" value="${GEAR.bottleKg}"></label>
+    </div>
+    <p class="small red hidden" id="gearErr"></p>
+    <div class="btn-row mt"><button class="btn sm ghost" data-act="gearDefault">↺ 改回預設（15 lb／1.2 kg）</button>
+      <button class="btn green" data-act="saveGear" data-from="${from}">💾 儲存器材設定</button></div>
+    <p class="tiny muted">修改只影響之後的訓練和「快速填入」按鈕；已經記錄的組數會保留當時的重量。</p>`;
+}
+
 /* ---------- 設定與備份 ---------- */
 function settingsHTML() {
   const bytes = ['training', 'game', 'settings'].reduce((a, k) => a + (localStorage.getItem(KEYS[k]) || '').length, 0);
-  return `<h3>備份</h3>
+  return `<h3>器材設定</h3>${gearFormHTML('settings')}
+    <h3 class="mt">備份</h3>
     <p class="small muted">資料只存在這個瀏覽器裡（LocalStorage）。換手機、清除瀏覽器資料前，請先匯出備份。</p>
     <div class="btn-row"><button class="btn" data-act="exportJSON">⬇ 匯出完整 JSON 備份</button>
       <button class="btn ghost" data-act="importJSON">⬆ 匯入 JSON 備份</button>
@@ -2417,6 +2460,7 @@ function createSession(dayId, precheck) {
     pausedMs: 0, pausedAt: null, status: 'active', lastTouch: Date.now(),
     precheck, warmupDone: false, cooldownDone: false,
     worseNote: !!worseReminder(),
+    gear: { bandLb: GEAR.bandLb, bottleKg: GEAR.bottleKg },   // 當次訓練開始時的器材設定
     exercises: d.exercises.map(def => ({
       exerciseId: def.id, status: 'pending', skipReason: null, altIndex: null,
       sets: Array.from({ length: def.sets || 1 }, () => newSet()), painReports: []
@@ -2521,6 +2565,7 @@ function validateSession(sess, where, expectStatus) {
   if (expectStatus && sess.status !== expectStatus) err.push(`${where}：狀態應為 ${expectStatus}`);
   if (!expectStatus && !isStr(sess.status)) err.push(`${where}：缺少狀態`);
   if (!optType(sess.endedAt, isNum) || !optType(sess.pausedMs, isNum) || !optType(sess.pausedAt, isNum)) err.push(`${where}：時間欄位型態錯誤`);
+  if (!optType(sess.gear, g => isObj(g))) err.push(`${where}：gear 必須是物件`);
   if (!Array.isArray(sess.exercises)) { err.push(`${where}：exercises 不是陣列`); return err; }
   sess.exercises.forEach((e, i) => {
     const w = `${where} 動作 ${i + 1}`;
@@ -2568,7 +2613,10 @@ function validateBackup(data) {
     if (!optType(g.name, isStr)) err.push('game.name 必須是文字');
   }
   if (!isObj(data.settings)) err.push('缺少 settings');
-  else ['sound', 'vibrate'].forEach(k => { if (!optType(data.settings[k], v => typeof v === 'boolean')) err.push(`settings.${k} 必須是 true/false`); });
+  else {
+    ['sound', 'vibrate'].forEach(k => { if (!optType(data.settings[k], v => typeof v === 'boolean')) err.push(`settings.${k} 必須是 true/false`); });
+    if (!optType(data.settings.gear, g => isObj(g) && ['bandLb', 'bottleKg'].every(k => isNum(g[k]) && g[k] > 0))) err.push('settings.gear 的器材重量必須是大於 0 的數字');
+  }
   return err;
 }
 function importJSONFile(file) {
@@ -2759,6 +2807,24 @@ const ACTIONS = {
     const v = num(x[kl]) !== null ? x[kl] : x[kr];
     if (num(v) === null) { toast('請先填其中一側'); return; }
     x[kl] = x[kr] = String(v); saveTraining(); render();
+  },
+  openGear() { openModal('器材設定', gearFormHTML('modal')); },
+  gearDefault() {
+    const b = document.getElementById('gearBand'), w = document.getElementById('gearBottle');
+    if (b) b.value = GEAR_DEFAULT.bandLb; if (w) w.value = GEAR_DEFAULT.bottleKg;
+  },
+  saveGear(el) {
+    const band = num(document.getElementById('gearBand').value), bottle = num(document.getElementById('gearBottle').value);
+    const err = document.getElementById('gearErr');
+    const bad = [];
+    if (band === null || band < GEAR_LIMIT.bandLb[0] || band > GEAR_LIMIT.bandLb[1]) bad.push(`阻力帶請輸入 ${GEAR_LIMIT.bandLb[0]}–${GEAR_LIMIT.bandLb[1]} lb`);
+    if (bottle === null || bottle < GEAR_LIMIT.bottleKg[0] || bottle > GEAR_LIMIT.bottleKg[1]) bad.push(`水瓶請輸入 ${GEAR_LIMIT.bottleKg[0]}–${GEAR_LIMIT.bottleKg[1]} kg`);
+    if (bad.length) { err.textContent = bad.join('；') + '。沒有儲存。'; err.classList.remove('hidden'); return; }
+    settings.gear = { bandLb: Math.round(band * 10) / 10, bottleKg: Math.round(bottle * 100) / 100 };
+    saveSettings();
+    if (el.dataset.from === 'settings') openModal('設定與備份', settingsHTML()); else closeModal();
+    render();
+    toast(`器材設定已儲存：阻力帶 ${GEAR.bandLb} lb、水瓶 ${GEAR.bottleKg} kg`);
   },
   quickFill(el) {
     const x = training.active.exercises[+el.dataset.i].sets[+el.dataset.s];
